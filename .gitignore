@@ -90,3 +90,9 @@ ENV/
 
 # data folder with wikipedia dumps in it
 data/
+
+# pydev
+.project
+.pydevproject
+
+
