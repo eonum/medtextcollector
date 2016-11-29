@@ -1,3 +1,4 @@
 {
-    "base-folder": "data/classification_output"
+    "base-folder": "data/output",
+    "crawler-root-url": "http://www.msd-manual.de/msdmanual/"
 }
