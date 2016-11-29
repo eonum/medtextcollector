@@ -1,6 +1,7 @@
 import requests
 from bs4 import BeautifulSoup
 from urllib.parse import urlparse, urlunsplit, urljoin
+import justext
 
 class Crawler:
     def __init__(self):
@@ -41,10 +42,17 @@ class Crawler:
             r = requests.get(url)
             soup = BeautifulSoup(r.text, 'lxml')
             
+            paragraphs = justext.justext(r.content, justext.get_stoplist("German"))
+            for paragraph in paragraphs:
+                if not paragraph.is_boilerplate:
+                    print(paragraph.text)
+            
+            input("Press enter to continue ...")
+            
             for a in soup.find_all('a'):
                 if self.is_http(a.get('href')):
                     self.add_url(self.get_absolute_url(url, a.get('href')))
-                
+            
             url = self.get_next_url()
 
 if __name__ == '__main__':
