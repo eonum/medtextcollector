@@ -143,7 +143,10 @@ class Crawler:
         
         content = self.extract_content(r.content)
         
-        if len(content) > 0 and not self.content_is_duplicated(content):               
+        if self.content_is_duplicated(content):
+            return
+        
+        if len(content) > 0:               
             with open(os.path.join(__CONFIG__['base-folder'], 'crawler', 'pages', self.filename_from_url(url)), 'w') as file:       
                 file.write(content)
             
