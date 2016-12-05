@@ -17,6 +17,7 @@ import sys
 
 class Crawler:
     def __init__(self, base_url):
+        self.base_url = base_url
         if not self.load_state():
             self.urls = [(base_url, 1)]
             self.visited_urls = []
@@ -127,7 +128,7 @@ class Crawler:
         if __CONFIG__['boilerplate-removal'] == 'justext':
             return self.extract_content_using_justext(raw_page)
         elif __CONFIG__['boilerplate-removal'] == 'readability':
-            return self.extract_content_using_justext(raw_page)
+            return self.extract_content_using_readability(raw_page)
         
     def content_is_duplicated(self, content):       
         h = md5(content.encode('utf-8')).hexdigest()
@@ -141,7 +142,11 @@ class Crawler:
         r = requests.get(url)
         soup = BeautifulSoup(r.text, 'lxml')
         
-        content = self.extract_content(r.content)
+        if not soup.find():
+            return
+        
+        if len(r.content) > 0:
+            content = self.extract_content(r.content)
         
         if self.content_is_duplicated(content):
             return

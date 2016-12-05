@@ -1,6 +1,7 @@
 {
     "base-folder": "data/output",
-    "crawler-root-url": "http://www.msd-manual.de/msdmanual/htbin/msdmanual.pl?m=0-0",
+    "input-folder": "data/input",
+    "crawler-root-url": "https://www.eonum.ch",
     "boilerplate-removal": "readability",
     "max_urls": -1
 }

@@ -7,14 +7,23 @@ from pprint import pprint
 import os
 import pickle
 
+def load_documents(path):
+    documents = []
+    for (dirpath, dirnames, filenames) in os.walk(path):
+        for filename in filenames: 
+            with open(os.path.join(dirpath, filename), 'r') as file:
+                documents.append(file.read())
+        break
+    return documents
+
 if __name__ == '__main__':
     print('Preparing base folder... ')
-    if not os.path.exists(__CONFIG__['base-folder']):
-        os.makedirs(__CONFIG__['base-folder'])
+    if not os.path.exists(os.path.join(__CONFIG__['base-folder'], 'classificator')):
+        os.makedirs(os.path.join(__CONFIG__['base-folder'], 'classificator'))
         
     print('Loading data ...')
-    positive_documents = ['Dies ist ein Testdokument.', 'Dies ist auch ein Testdkument.', 'Und noch ein Testdokument']
-    unlabeled_documents = ['Lorem ipsum.', 'Dolor sit amet.', 'Blablaba bla bla.']
+    positive_documents = load_documents(os.path.join(__CONFIG__['input-folder'], 'positive'))
+    unlabeled_documents = load_documents(os.path.join(__CONFIG__['input-folder'], 'unlabeled'))
     
     print('Tokenizing ...')
     tokenizer = SimpleGermanTokenizer()
@@ -31,8 +40,8 @@ if __name__ == '__main__':
     
     classifier = PositiveNaiveBayesClassifier.train(positive_vectorized_documents, unlabeled_vectorized_documents)
     
-    print("Saving model to " + os.path.join(__CONFIG__['base-folder'], 'pos_naive_bayes_model.pickle') + " ...")    
-    with open(os.path.join(__CONFIG__['base-folder'], 'pos_naive_bayes_model.pickle'), 'wb') as file:
+    print("Saving model to " + os.path.join(__CONFIG__['base-folder'], 'classificator', 'pos_naive_bayes_model.pickle') + " ...")    
+    with open(os.path.join(__CONFIG__['base-folder'], 'classificator','pos_naive_bayes_model.pickle'), 'wb') as file:
         pickle.dump(classifier, file)
         
-    pprint(classifier.prob_classify(simple_bag_of_words(tokenizer.tokenize("Nochmal ein Testdokument."))).prob(True))    
+    #pprint(classifier.prob_classify(simple_bag_of_words(tokenizer.tokenize("Nochmal ein Testdokument."))).prob(True))    
