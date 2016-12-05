@@ -13,6 +13,7 @@ import random
 from operator import itemgetter
 import atexit
 import json
+import sys
 
 class Crawler:
     def __init__(self, base_url):
@@ -28,7 +29,7 @@ class Crawler:
     def save_state(self):
         self.sort_and_crop_urls()
         state = {'visited_urls': self.visited_urls, 'urls': self.urls}
-        with open(os.path.join(__CONFIG__['base-folder'], 'crawler', 'crawler_state.json'), "a") as file:
+        with open(os.path.join(__CONFIG__['base-folder'], 'crawler', 'crawler_state.json'), "w") as file:
             json.dump(state, file)
         print("Current state was saved to filesystem.")
         
@@ -126,25 +127,31 @@ class Crawler:
         elif __CONFIG__['boilerplate-removal'] == 'readability':
             return self.extract_content_using_justext(raw_page)        
     
+    def process_url(self, url):
+        print('Processing ' + url + ' ...')
+        r = requests.get(url)
+        soup = BeautifulSoup(r.text, 'lxml')
+        
+        content = self.extract_content(r.content)
+        
+        if len(content) > 0:               
+            with open(os.path.join(__CONFIG__['base-folder'], 'crawler', 'pages', self.filename_from_url(url)), 'w') as file:       
+                file.write(content)
+            
+        for a in soup.find_all('a'):
+            if self.scheme_is_http_or_none(a.get('href')):
+                self.add_url(self.get_absolute_url(url, a.get('href')))
+
+    
     def crawl(self):
         url = self.get_next_url()
         while url:
-            print('Processing ' + url + ' ...')
-            r = requests.get(url)
-            soup = BeautifulSoup(r.text, 'lxml')
-            
-            content = self.extract_content(r.content)
-            
-            if len(content) > 0:               
-                with open(os.path.join(__CONFIG__['base-folder'], 'crawler', 'pages', self.filename_from_url(url)), 'w') as file:       
-                    file.write(content)
+            try:
+                self.process_url(url)
+                url = self.get_next_url()
+            except KeyboardInterrupt:
+                sys.exit()
                 
-            for a in soup.find_all('a'):
-                if self.scheme_is_http_or_none(a.get('href')):
-                    self.add_url(self.get_absolute_url(url, a.get('href')))
-            
-            url = self.get_next_url()
-
 
 if __name__ == '__main__':
     random.seed(1234) # Just needed to make the mocked get_p() deterministic
