@@ -23,8 +23,9 @@ class Crawler:
     def sort_and_crop_urls(self):
         self.urls.sort(key=itemgetter(1), reverse=True)
         
-        if len(self.urls) > __CONFIG__['max_urls']:
-            self.urls[:__CONFIG__['max_urls']]
+        if __CONFIG__['max_urls'] > 0:
+            if len(self.urls) > __CONFIG__['max_urls']:
+                self.urls[:__CONFIG__['max_urls']]
         
     def get_next_url(self):
         if len(self.urls) == 0:
@@ -55,13 +56,12 @@ class Crawler:
     
     def get_absolute_url(self, current_url, next_url):
         if not self.is_absolute_url(next_url):
-            split_url = urlparse(current_url)
-            base_url = urlunsplit((split_url.scheme, split_url.netloc, '', '', ''))
-            next_url = urljoin(base_url, next_url)
+            next_url = urljoin(current_url, next_url)
         return next_url
     
-    def is_http(self, url):
-        return urlparse(url).scheme == 'http'
+    def scheme_is_http_or_none(self, url):
+        scheme = urlparse(url).scheme
+        return scheme == 'http' or scheme == ''
     
     def slugify(self, s):
         return re.sub(r'\W+', '-', unidecode(s).lower())
@@ -109,7 +109,7 @@ class Crawler:
                     file.write(content)
                 
             for a in soup.find_all('a'):
-                if self.is_http(a.get('href')):
+                if self.scheme_is_http_or_none(a.get('href')):
                     self.add_url(self.get_absolute_url(url, a.get('href')))
             
             url = self.get_next_url()
