@@ -8,31 +8,48 @@ import re
 from unidecode import unidecode
 from hashlib import md5
 from readability import Document
-from html2text import html2text
 from lxml import html
+import random
+from operator import itemgetter
 
 class Crawler:
     def __init__(self, base_url):
-        self.urls = [base_url]
+        self.urls = [(base_url, 1)]
         self.visited_urls = []
         
         if not os.path.exists(os.path.join(__CONFIG__['base-folder'], 'crawler', 'pages')):
             os.makedirs(os.path.join(__CONFIG__['base-folder'], 'crawler', 'pages'))
     
+    def sort_and_crop_urls(self):
+        self.urls.sort(key=itemgetter(1), reverse=True)
+        
+        if len(self.urls) > __CONFIG__['max_urls']:
+            self.urls[:__CONFIG__['max_urls']]
+        
     def get_next_url(self):
         if len(self.urls) == 0:
             return None
+        self.sort_and_crop_urls()
         url = self.urls.pop(0)
-        self.visited_urls.append(url)
-        return url
+        self.visited_urls.append(url[0])
+        return url[0]
     
     def add_url(self, url):
         if url in self.visited_urls:
             return False
-        
-        self.urls.append(url)
+
+        p = self.get_p(url)
+        if p > 0.8:
+            self.urls.append((url, p))
         return True
-    
+
+    def get_p(self, url):
+        #TODO (mockup)
+        p = None
+        while not p or p == 0.8:
+            p = random.uniform(0.8, 1)
+        return p
+        
     def is_absolute_url(self, url):
         return bool(urlparse(url).netloc)
     
@@ -78,7 +95,7 @@ class Crawler:
         elif __CONFIG__['boilerplate-removal'] == 'readability':
             return self.extract_content_using_justext(raw_page)        
     
-    def run(self):
+    def crawl(self):
         url = self.get_next_url()
         while url:
             print('Processing ' + url + ' ...')
@@ -98,6 +115,8 @@ class Crawler:
             url = self.get_next_url()
 
 
+    
 if __name__ == '__main__':
+    random.seed(1234) # Just needed to make the mocked get_p() deterministic
     crawler = Crawler(__CONFIG__['crawler-root-url'])
-    crawler.run()   
+    crawler.crawl()
