@@ -16,8 +16,9 @@ import json
 
 class Crawler:
     def __init__(self, base_url):
-        self.urls = [(base_url, 1)]
-        self.visited_urls = []
+        if not self.load_state():
+            self.urls = [(base_url, 1)]
+            self.visited_urls = []
         
         if not os.path.exists(os.path.join(__CONFIG__['base-folder'], 'crawler', 'pages')):
             os.makedirs(os.path.join(__CONFIG__['base-folder'], 'crawler', 'pages'))
@@ -30,6 +31,17 @@ class Crawler:
         with open(os.path.join(__CONFIG__['base-folder'], 'crawler', 'crawler_state.json'), "a") as file:
             json.dump(state, file)
         print("Current state was saved to filesystem.")
+        
+    def load_state(self):
+        try:
+            with open(os.path.join(__CONFIG__['base-folder'], 'crawler', 'crawler_state.json'), "r") as file:
+                print("Loading crawler state from filesystem ...")
+                state = json.load(file)
+                self.urls = state['urls']
+                self.visited_urls = state['visited_urls']
+                return True
+        except FileNotFoundError:
+            return False
             
     def sort_and_crop_urls(self):
         self.urls.sort(key=itemgetter(1), reverse=True)
@@ -39,7 +51,6 @@ class Crawler:
                 self.urls = self.urls[:__CONFIG__['max_urls']]
     
     def add_visited_url(self, url):
-
         self.visited_urls.append(url)
             
     def get_next_url(self):
