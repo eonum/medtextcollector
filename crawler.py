@@ -1,7 +1,7 @@
 from load_config import __CONFIG__
 import requests
 from bs4 import BeautifulSoup
-from urllib.parse import urlparse, urlunsplit, urljoin
+from urllib.parse import urlparse, urljoin
 import justext
 import os
 import re
@@ -11,6 +11,8 @@ from readability import Document
 from lxml import html
 import random
 from operator import itemgetter
+import atexit
+import json
 
 class Crawler:
     def __init__(self, base_url):
@@ -19,30 +21,48 @@ class Crawler:
         
         if not os.path.exists(os.path.join(__CONFIG__['base-folder'], 'crawler', 'pages')):
             os.makedirs(os.path.join(__CONFIG__['base-folder'], 'crawler', 'pages'))
-    
+        
+        atexit.register(self.save_state)
+            
+    def save_state(self):
+        self.sort_and_crop_urls()
+        state = {'visited_urls': self.visited_urls, 'urls': self.urls}
+        with open(os.path.join(__CONFIG__['base-folder'], 'crawler', 'crawler_state.json'), "a") as file:
+            json.dump(state, file)
+        print("Current state was saved to filesystem.")
+            
     def sort_and_crop_urls(self):
         self.urls.sort(key=itemgetter(1), reverse=True)
         
         if __CONFIG__['max_urls'] > 0:
             if len(self.urls) > __CONFIG__['max_urls']:
-                self.urls[:__CONFIG__['max_urls']]
-        
+                self.urls = self.urls[:__CONFIG__['max_urls']]
+    
+    def add_visited_url(self, url):
+
+        self.visited_urls.append(url)
+            
     def get_next_url(self):
         if len(self.urls) == 0:
             return None
         self.sort_and_crop_urls()
         url = self.urls.pop(0)
-        self.visited_urls.append(url[0])
+        self.add_visited_url(url[0])
         return url[0]
     
     def add_url(self, url):
         if url in self.visited_urls:
             return False
-
-        p = self.get_p(url)
-        if p > 0.8:
-            self.urls.append((url, p))
-        return True
+        
+        try:
+            next(x for x in self.urls if x[0] == url)
+        except StopIteration:
+            p = self.get_p(url)
+            if p > 0.8:
+                self.urls.append((url, p))
+            return True
+        
+        return False
 
     def get_p(self, url):
         #TODO (mockup)
@@ -115,7 +135,6 @@ class Crawler:
             url = self.get_next_url()
 
 
-    
 if __name__ == '__main__':
     random.seed(1234) # Just needed to make the mocked get_p() deterministic
     crawler = Crawler(__CONFIG__['crawler-root-url'])
