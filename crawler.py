@@ -14,6 +14,7 @@ from operator import itemgetter
 import atexit
 import json
 import sys
+from classifier import Classifier
 
 class Crawler:
     def __init__(self, base_url):
@@ -25,6 +26,8 @@ class Crawler:
         
         if not os.path.exists(os.path.join(__CONFIG__['base-folder'], 'crawler', 'pages')):
             os.makedirs(os.path.join(__CONFIG__['base-folder'], 'crawler', 'pages'))
+        
+        self.classifier = Classifier(__CONFIG__)
         
         atexit.register(self.save_state)
             
@@ -80,10 +83,19 @@ class Crawler:
         return False
 
     def get_p(self, url):
-        #TODO (mockup)
-        p = None
-        while not p or p == 0.8:
-            p = random.uniform(0.8, 1)
+        r = requests.get(url)
+        soup = BeautifulSoup(r.text, 'lxml')
+        
+        if not soup.find():
+            return
+        
+        if len(r.content) > 0:
+            content = self.extract_content(r.content)
+        
+        p = self.classifier.classify(content)
+        
+        print(" Rating "+ url + " :" + str(p))
+        
         return p
         
     def is_absolute_url(self, url):
@@ -170,6 +182,5 @@ class Crawler:
                 
 
 if __name__ == '__main__':
-    random.seed(1234) # Just needed to make the mocked get_p() deterministic
     crawler = Crawler(__CONFIG__['crawler-root-url'])
     crawler.crawl()
