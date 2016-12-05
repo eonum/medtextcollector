@@ -7,6 +7,9 @@ import os
 import re
 from unidecode import unidecode
 from hashlib import md5
+from readability import Document
+from html2text import html2text
+from lxml import html
 
 class Crawler:
     def __init__(self, base_url):
@@ -53,6 +56,27 @@ class Crawler:
             h = '_md5_'+str(md5(slug.encode('utf-8')).hexdigest()) + '.txt'
             return slug[:max_size-len(h)] + h
         return slug
+ 
+    def extract_content_using_justext(self, raw_page):
+        paragraphs = justext.justext(raw_page, justext.get_stoplist("German"))
+        content = ''
+        for paragraph in paragraphs:
+            if not paragraph.is_boilerplate:
+                if len(content) > 0:
+                    content += '\n'
+                content += paragraph.text    
+        return content   
+     
+    def extract_content_using_readability(self, raw_page):
+        doc = Document(raw_page)    
+        html_doc = html.document_fromstring(doc.summary())
+        return html_doc.text_content()
+    
+    def extract_content(self, raw_page):
+        if __CONFIG__['boilerplate-removal'] == 'justext':
+            return self.extract_content_using_justext(raw_page)
+        elif __CONFIG__['boilerplate-removal'] == 'readability':
+            return self.extract_content_using_justext(raw_page)        
     
     def run(self):
         url = self.get_next_url()
@@ -61,13 +85,7 @@ class Crawler:
             r = requests.get(url)
             soup = BeautifulSoup(r.text, 'lxml')
             
-            paragraphs = justext.justext(r.content, justext.get_stoplist("German"))
-            content = ''
-            for paragraph in paragraphs:
-                if not paragraph.is_boilerplate:
-                    if len(content) > 0:
-                        content += '\n'
-                    content += paragraph.text
+            content = self.extract_content(r.content)
             
             if len(content) > 0:               
                 with open(os.path.join(__CONFIG__['base-folder'], 'crawler', 'pages', self.filename_from_url(url)), 'w') as file:       
