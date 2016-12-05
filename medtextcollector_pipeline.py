@@ -43,5 +43,5 @@ if __name__ == '__main__':
     print("Saving model to " + os.path.join(__CONFIG__['base-folder'], 'classificator', 'pos_naive_bayes_model.pickle') + " ...")    
     with open(os.path.join(__CONFIG__['base-folder'], 'classificator','pos_naive_bayes_model.pickle'), 'wb') as file:
         pickle.dump(classifier, file)
-        
-    #pprint(classifier.prob_classify(simple_bag_of_words(tokenizer.tokenize("Nochmal ein Testdokument."))).prob(True))    
+      
+    # TODO: Evaluate  
