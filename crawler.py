@@ -20,6 +20,7 @@ class Crawler:
         if not self.load_state():
             self.urls = [(base_url, 1)]
             self.visited_urls = []
+            self.content_hashes = []
         
         if not os.path.exists(os.path.join(__CONFIG__['base-folder'], 'crawler', 'pages')):
             os.makedirs(os.path.join(__CONFIG__['base-folder'], 'crawler', 'pages'))
@@ -28,7 +29,7 @@ class Crawler:
             
     def save_state(self):
         self.sort_and_crop_urls()
-        state = {'visited_urls': self.visited_urls, 'urls': self.urls}
+        state = {'visited_urls': self.visited_urls, 'urls': self.urls, 'content_hashes': self.content_hashes}
         with open(os.path.join(__CONFIG__['base-folder'], 'crawler', 'crawler_state.json'), "w") as file:
             json.dump(state, file)
         print("Current state was saved to filesystem.")
@@ -40,6 +41,7 @@ class Crawler:
                 state = json.load(file)
                 self.urls = state['urls']
                 self.visited_urls = state['visited_urls']
+                self.content_hashes = state['content_hashes']
                 return True
         except FileNotFoundError:
             return False
@@ -125,7 +127,14 @@ class Crawler:
         if __CONFIG__['boilerplate-removal'] == 'justext':
             return self.extract_content_using_justext(raw_page)
         elif __CONFIG__['boilerplate-removal'] == 'readability':
-            return self.extract_content_using_justext(raw_page)        
+            return self.extract_content_using_justext(raw_page)
+        
+    def content_is_duplicated(self, content):       
+        h = md5(content.encode('utf-8')).hexdigest()
+        if h in self.content_hashes:
+            return True
+        self.content_hashes.append(h)
+        return False
     
     def process_url(self, url):
         print('Processing ' + url + ' ...')
@@ -134,14 +143,13 @@ class Crawler:
         
         content = self.extract_content(r.content)
         
-        if len(content) > 0:               
+        if len(content) > 0 and not self.content_is_duplicated(content):               
             with open(os.path.join(__CONFIG__['base-folder'], 'crawler', 'pages', self.filename_from_url(url)), 'w') as file:       
                 file.write(content)
             
         for a in soup.find_all('a'):
             if self.scheme_is_http_or_none(a.get('href')):
                 self.add_url(self.get_absolute_url(url, a.get('href')))
-
     
     def crawl(self):
         url = self.get_next_url()
