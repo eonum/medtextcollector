@@ -65,7 +65,7 @@ def run():
     unlabeled_documents_train, unlabeled_documents_test = load_documents(os.path.join(__CONFIG__['input-folder'], 'unlabeled'))
     
     positive_documents_train, unlabeled_documents_train = unskew(positive_documents_train, unlabeled_documents_train)
-    positive_documents_test, unlabeled_documents_test = unskew(positive_documents_train, unlabeled_documents_train)
+    positive_documents_test, unlabeled_documents_test = unskew(positive_documents_test, unlabeled_documents_test)
     
     print("Training")
     print('Tokenizing training set ...')
