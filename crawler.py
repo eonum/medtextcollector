@@ -76,7 +76,7 @@ class Crawler:
             next(x for x in self.urls if x[0] == url)
         except StopIteration:
             p = self.get_p(url)
-            if p > 0.8:
+            if p > __CONFIG__['threshold']:
                 self.urls.append((url, p))
             return True
         
