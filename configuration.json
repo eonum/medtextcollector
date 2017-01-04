@@ -1,0 +1,9 @@
+{
+    "base-folder": "data/output",
+    "input-folder": "data/input",
+    "crawler-root-url": "http://www.eonum.ch/",
+    "boilerplate-removal": "readability",
+    "max_urls": -1,
+    "testset-ratio": 0.2,
+    "threshold": 0.8
+}
