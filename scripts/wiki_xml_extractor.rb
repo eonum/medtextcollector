@@ -20,3 +20,62 @@ Dir.glob("../data/dewiki-latest-pages-articles*").each do |filename|
     }
   }
 end
+
+#### this part cleans the extracted text. Script is in progress
+
+file_content = File.open("out_dewiki-latest-pages-articles1.xml-p000000001p000425449.wiki", "r:UTF-8", &:read); nil
+file_content = file_content.gsub(/\n/, ""); nil
+content = []
+file_content.scan(/{{-start-}}(.*?){{-stop-}}/).each do |hit|
+  content << hit.to_s
+end; nil
+
+File.open("test", "w+") do |f|
+  content.each { |element| f.puts(element) }
+end; nil
+
+
+categories = []
+File.readlines('gesundheit_category.txt').each do |line|
+  line = line.gsub(/\n/, "")
+  categories << line
+end; nil
+
+matches = []
+
+content.each do |element|
+  catch :categoryfound do
+    categories.each do |category|
+      if element.include?("[[Kategorie:#{category}]]")
+        matches << element
+      end
+    end
+  end
+end; nil
+
+matches.map! do |element|
+  element = element.gsub(/<ref(.*?)<\/ref>/, "")
+  element = element.gsub(/== Literatur ==(.*?)==/, "")
+  element = element.gsub(/== Weblinks ==(.*?)==/, "")
+  element = element.gsub(/== Einzelnachweise ==(.*?)==/, "")
+  element = element.gsub(/\[\[/, "")
+  element = element.gsub(/\]\]/, "")
+  element = element.gsub(/<ref(.*?)>/, "")
+  element = element.gsub(/\'\'{{lang(.*?)\'\'/, "")
+  element = element.gsub(/{{lang(.*?)}}/, "")
+  element = element.gsub(/=====/, "")
+  element = element.gsub(/====/, "")
+  element = element.gsub(/===/, "")
+  element = element.gsub(/==/, "")
+  element = element.gsub(/'''''/, "")
+  element = element.gsub(/''''/, "")
+  element = element.gsub(/'''/, "")
+  element = element.gsub(/''/, "")
+  element = element.gsub(/\*\*\*\*\*/, "")
+  element = element.gsub(/\*\*\*\*/, "")
+  element = element.gsub(/\*\*\*/, "")
+  element = element.gsub(/\*\*/, "")
+  element = element.gsub(/\{\|(.*?)\|\}/, "")
+  element = element.gsub(/\{\{(.*?)\}\}/, "")
+  element = element.gsub(/&nbsp\;/, "")
+end;nil
