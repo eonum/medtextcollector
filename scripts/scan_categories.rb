@@ -6,7 +6,12 @@ text.each_line do |line|
   line.scan(/'([^']*)',/).each{|w| arr << w}
 end
 
-key_words = ["Medizin nach Zeit","Mediziner","Alternativmedizin","Medizinische Bildung","Biomedizin","Diagnostik","Medizinische Dokumentation","Epidemiologie","Medizinethik","Ethnomedizin","Evidenzbasierte Medizin","Exkrement","Medizin in Film und Fernsehen","Medizinisches Gebiet","Medizingeschichte","Heilberuf","Medizininformatik","Japanische Medizin","Krankheit","Krankheit als Thema","Medizinische Klassifikation","Naturheilkunde","Organ als Thema","Organisation Medizin","Medizinpreis","Medizinrecht","Sachliteratur Medizin","Sexualmedizin","Medizinstatistik","Strahlenbiologie","Medizintechnik","Therapie","Veterinärmedizi","Medizinische Vorsorg","Zahnmedizin", "medizin", "gesundheit"]
+key_words = []
+File.open("../data/key_words", "r") do |f|
+  f.each_line do |line|
+  key_words << line.delete!("\n")
+  end
+end
 
 File.open("../data/categories", "w+") do |f|
   arr.each do |element| 
