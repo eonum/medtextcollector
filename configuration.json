@@ -1,9 +1,9 @@
 {
     "base-folder": "data/output",
     "input-folder": "data/input",
-    "crawler-root-url": "http://www.eonum.ch/",
+    "crawler-root-url": "http://www.medizinfo.de/",
     "boilerplate-removal": "readability",
     "max_urls": -1,
     "testset-ratio": 0.1,
-    "threshold": 0.99
+    "threshold": 0.8
 }

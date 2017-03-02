@@ -2,6 +2,7 @@ from load_config import __CONFIG__
 from tokenizer import SimpleGermanTokenizer
 from vectorizer import bag_of_words
 from nltk import NaiveBayesClassifier
+from nltk.metrics import accuracy, precision, recall, f_measure, ConfusionMatrix
 from pprint import pprint
 import os
 import pickle
@@ -71,8 +72,22 @@ def run():
     positive_vectorized_documents_test = [(bag_of_words(tokens), True) for tokens in positive_tokenized_documents_test]
     unlabeled_vectorized_documents_test = [(bag_of_words(tokens), False) for tokens in unlabeled_tokenized_documents_test]
 
-    classifier.show_most_informative_features(5)
-    print('Accuracy: %s' % nltk.classify.accuracy(classifier, positive_vectorized_documents_test + unlabeled_vectorized_documents_test))
+    ref = []
+    test = []
+    
+    for v, l in positive_vectorized_documents_test + unlabeled_vectorized_documents_test:
+        test.append(classifier.prob_classify(v).prob(True))
+        ref.append(l)    
+    
+    for threshold in [0.6, 0.7, 0.8, 0.9]:
+        print('Threshold: %s' % threshold)
+        thresholded = [e > threshold for e in test]
+        print('Accuracy: %s' % accuracy(ref, thresholded))
+        print(ConfusionMatrix(ref, thresholded))
+    
+    #classifier.show_most_informative_features(5)
+    
+    #print('Accuracy: %s' % nltk.classify.accuracy(classifier, positive_vectorized_documents_test + unlabeled_vectorized_documents_test))
 
 if __name__ == '__main__':
     run()
