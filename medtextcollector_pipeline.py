@@ -85,9 +85,5 @@ def run():
         print('Accuracy: %s' % accuracy(ref, thresholded))
         print(ConfusionMatrix(ref, thresholded))
     
-    #classifier.show_most_informative_features(5)
-    
-    #print('Accuracy: %s' % nltk.classify.accuracy(classifier, positive_vectorized_documents_test + unlabeled_vectorized_documents_test))
-
 if __name__ == '__main__':
     run()

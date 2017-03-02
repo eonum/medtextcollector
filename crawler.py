@@ -83,7 +83,11 @@ class Crawler:
         return False
 
     def get_p(self, url):
-        r = requests.get(url)
+        try:
+            r = requests.get(url)
+        except Exception:
+            return 0.0
+        
         soup = BeautifulSoup(r.text, 'lxml')
         
         if not soup.find():
@@ -94,7 +98,7 @@ class Crawler:
         
         p = self.classifier.classify(content)
         
-        print(" Rating "+ url + " :" + str(p))
+        print(" Rating "+ url + " : " + str(p))
         
         return p
         
@@ -179,7 +183,6 @@ class Crawler:
                 url = self.get_next_url()
             except KeyboardInterrupt:
                 sys.exit()
-                
 
 if __name__ == '__main__':
     crawler = Crawler(__CONFIG__['crawler-root-url'])
