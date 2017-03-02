@@ -8,6 +8,7 @@ import os
 import pickle
 import random
 
+import pdb
 
 def load_documents(path):
     documents = []
@@ -43,7 +44,7 @@ def evaluate(model, positive_vectorized_documents_test, negative_vectorized_docu
             neg_pos += 1
         else:
             neg_neg += 1
-    
+        
     acc = pos_pos / (pos_pos + pos_neg + neg_neg + neg_pos)
     prec = pos_pos / (pos_pos + pos_neg)
     rec = pos_pos / (pos_pos + pos_neg)
@@ -52,9 +53,8 @@ def evaluate(model, positive_vectorized_documents_test, negative_vectorized_docu
 
 def unskew(dataset_a, dataset_b):
     min_len = min(len(dataset_a), len(dataset_b))
-    return dataset_a[:min_len], dataset_b[:min_len
-                                          
-                                          ]
+    return dataset_a[:min_len], dataset_b[:min_len]
+
 def run():
     print('Preparing base folder... ')
     if not os.path.exists(os.path.join(__CONFIG__['base-folder'], 'classificator')):
@@ -64,8 +64,12 @@ def run():
     positive_documents_train, positive_documents_test = load_documents(os.path.join(__CONFIG__['input-folder'], 'positive'))
     unlabeled_documents_train, unlabeled_documents_test = load_documents(os.path.join(__CONFIG__['input-folder'], 'unlabeled'))
     
+    pdb.set_trace()
+    
     positive_documents_train, unlabeled_documents_train = unskew(positive_documents_train, unlabeled_documents_train)
     positive_documents_test, unlabeled_documents_test = unskew(positive_documents_test, unlabeled_documents_test)
+    
+    pdb.set_trace()
     
     print("Training")
     print('Tokenizing training set ...')
