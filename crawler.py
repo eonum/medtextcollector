@@ -19,6 +19,8 @@ from classifier import Classifier
 class Crawler:
     def __init__(self, base_url):
         self.base_url = base_url
+        self.request_cache = {}
+
         if not self.load_state():
             self.urls = [(base_url, 1)]
             self.visited_urls = []
@@ -84,7 +86,7 @@ class Crawler:
 
     def get_p(self, url):
         try:
-            r = requests.get(url)
+            r = self.request_from_cache(url)
         except Exception:
             return 0.0
         
@@ -153,9 +155,18 @@ class Crawler:
         self.content_hashes.append(h)
         return False
     
+    def request_from_cache(self, url):
+        slug = self.slugify(url)
+        if slug in self.request_cache:
+            r = self.request_cache[slug]
+        else:
+            r = requests.get(url)
+            self.request_cache[slug] = r
+        return r
+
     def process_url(self, url):
         print('Processing ' + url + ' ...')
-        r = requests.get(url)
+        r = self.request_from_cache(url)
         soup = BeautifulSoup(r.text, 'lxml')
         
         if not soup.find():
