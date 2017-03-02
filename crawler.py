@@ -9,12 +9,12 @@ from unidecode import unidecode
 from hashlib import md5
 from readability import Document
 from lxml import html
-import random
 from operator import itemgetter
 import atexit
 import json
 import sys
 from classifier import Classifier
+import tldextract
 
 class Crawler:
     def __init__(self, base_url):
@@ -24,6 +24,7 @@ class Crawler:
         if not self.load_state():
             self.urls = [(base_url, 1)]
             self.visited_urls = []
+            self.visits_per_tld = {}
             self.content_hashes = []
         
         if not os.path.exists(os.path.join(__CONFIG__['base-folder'], 'crawler', 'pages')):
@@ -35,7 +36,7 @@ class Crawler:
             
     def save_state(self):
         self.sort_and_crop_urls()
-        state = {'visited_urls': self.visited_urls, 'urls': self.urls, 'content_hashes': self.content_hashes}
+        state = {'visited_urls': self.visited_urls, 'urls': self.urls, 'visits_per_tld': self.visits_per_tld, 'content_hashes': self.content_hashes}
         with open(os.path.join(__CONFIG__['base-folder'], 'crawler', 'crawler_state.json'), "w") as file:
             json.dump(state, file)
         print("Current state was saved to filesystem.")
@@ -47,6 +48,7 @@ class Crawler:
                 state = json.load(file)
                 self.urls = state['urls']
                 self.visited_urls = state['visited_urls']
+                self.visits_per_tld = state['visits_per_tld']
                 self.content_hashes = state['content_hashes']
                 return True
         except FileNotFoundError:
@@ -87,6 +89,8 @@ class Crawler:
     def get_p(self, url):
         try:
             r = self.request_from_cache(url)
+            if not r:
+                return 0.0
         except Exception:
             return 0.0
         
@@ -160,6 +164,17 @@ class Crawler:
         if slug in self.request_cache:
             r = self.request_cache[slug]
         else:
+            tld = tldextract.extract(url)
+            tld = tld.domain + '.' + tld.suffix
+            if not __CONFIG__['max-visits-per-tld'] == -1:
+                if tld in self.visits_per_tld: 
+                    if self.visits_per_tld[tld] >= __CONFIG__['max-visits-per-tld'] or __CONFIG__['max-visits-per-tld'] == 0:
+                        print('Max. requests for %s reached.' % tld)
+                        return None
+                    else:
+                        self.visits_per_tld[tld] += 1
+                else:
+                    self.visits_per_tld[tld] = 1
             r = requests.get(url)
             self.request_cache[slug] = r
         return r
@@ -167,6 +182,10 @@ class Crawler:
     def process_url(self, url):
         print('Processing ' + url + ' ...')
         r = self.request_from_cache(url)
+        
+        if not r:
+            return
+        
         soup = BeautifulSoup(r.text, 'lxml')
         
         if not soup.find():

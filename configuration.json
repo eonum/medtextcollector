@@ -1,9 +1,10 @@
 {
     "base-folder": "data/output",
     "input-folder": "data/input",
-    "crawler-root-url": "http://www.medizinfo.de/",
+    "crawler-root-url": "http://de.wikipedia.org/wiki/Main_Page",
     "boilerplate-removal": "readability",
     "max_urls": -1,
     "testset-ratio": 0.1,
-    "threshold": 0.8
+    "threshold": 0.8,
+    "max-visits-per-tld": -1
 }
