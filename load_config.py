@@ -1,7 +1,8 @@
+# TODO refactor - I don't like loading the __CONFIG__ global
 from optparse import OptionParser
 import json
 import re
-        
+
 def load_config():
     parser = OptionParser()
     parser.add_option("-c", "--config", dest="config", help="specify configuration file")

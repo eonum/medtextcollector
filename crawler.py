@@ -97,7 +97,7 @@ class Crawler:
         soup = BeautifulSoup(r.text, 'lxml')
         
         if not soup.find():
-            return
+            return 0.0
         
         if len(r.content) > 0:
             content = self.extract_content(r.content)
