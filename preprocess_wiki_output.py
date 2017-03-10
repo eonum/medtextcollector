@@ -2,12 +2,34 @@ import argparse
 import os
 from hashlib import md5
 
-def split_file_to_documents(file_path):
+import pdb
+
+def split_file_to_documents(file_path, output_directory):
     with open(file_path, 'r') as file:
-        content = file.read()
-        documents = content.split('["')
-        documents = [document[:-2] for document in documents]
-        return documents
+        buf = ''
+        while True:
+            data = file.read(1024)
+            if not data:
+                break
+            data.replace('"]', '')
+            fragments = data.split('["')
+            if len(fragments) > 1:
+                buf += fragments[0]
+                clean_and_save_document(buf, output_directory)
+                buf = ""
+                for fragment in fragments[1:-1]:
+                    clean_and_save_document(fragment, output_directory)
+                buf += fragments[-1]       
+        if len(buf) > 0:
+            clean_and_save_document(buf, output_directory)
+                
+
+def clean_and_save_document(document, output_directory):
+    document = clean_document(document)
+    filename = generate_output_filename(document)
+    with open(os.path.join(output_directory, filename), 'w') as file:
+        file.write(document)
+    
     
 def clean_document(document):
     unwanted_chars= ['[', ']', '(', ')', '&', '/', '-', '<', '>', '|', '*', '!', ':']
@@ -19,6 +41,7 @@ def clean_document(document):
             clean_document += ' '
         
     return clean_document
+
 
 def generate_output_filename(document):
     h = md5(document.encode('utf-8')).hexdigest()
@@ -40,15 +63,6 @@ if __name__ == "__main__":
             parser.error('%s does not exist.' % file)
     
     print("Processing files ...")
-    documents = []
     for file in args.files:
-            for document in split_file_to_documents(file):
-                documents.append(clean_document(document))
+        split_file_to_documents(file, args.output_directory)
     
-    print("Writing files ...")
-    for document in documents:
-        filename = generate_output_filename(document)
-        with open(os.path.join(args.output_directory, filename), 'w') as file:
-            file.write(document)
-
-
