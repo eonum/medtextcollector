@@ -4,6 +4,21 @@ from hashlib import md5
 
 import pdb
 
+def split_buf_to_documents(buf, output_directory):
+    open_index = -1
+    close_index = -1
+    while(True):
+        open_index = buf.find('["')
+        if open_index < 0:
+            return buf
+        close_index = buf.find('"]')
+        if close_index < 0:
+            return buf
+        document = buf[open_index+2:close_index]
+        clean_and_save_document(document, output_directory)
+        buf = buf[close_index+2:]
+        
+        
 def split_file_to_documents(file_path, output_directory):
     with open(file_path, 'r') as file:
         buf = ''
@@ -11,18 +26,9 @@ def split_file_to_documents(file_path, output_directory):
             data = file.read(1024)
             if not data:
                 break
-            data.replace('"]', '')
-            fragments = data.split('["')
-            if len(fragments) > 1:
-                buf += fragments[0]
-                clean_and_save_document(buf, output_directory)
-                buf = ""
-                for fragment in fragments[1:-1]:
-                    clean_and_save_document(fragment, output_directory)
-                buf += fragments[-1]       
-        if len(buf) > 0:
-            clean_and_save_document(buf, output_directory)
-                
+            buf += data
+            buf = split_buf_to_documents(buf, output_directory)                   
+
 
 def clean_and_save_document(document, output_directory):
     document = clean_document(document)
@@ -32,7 +38,7 @@ def clean_and_save_document(document, output_directory):
     
     
 def clean_document(document):
-    unwanted_chars= ['[', ']', '(', ')', '&', '/', '-', '<', '>', '|', '*', '!', ':']
+    unwanted_chars= ['[', ']', '(', ')', '&', '/', '-', '<', '>', '|', '*', '!', ':', '']
     clean_document = ''
     for c in document:
         if not c in unwanted_chars:
