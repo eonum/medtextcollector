@@ -14,6 +14,7 @@ def load_documents(path, dataset_size):
             with open(os.path.join(dirpath, filename), 'r') as file:
                 documents.append(file.read())
         break
+    documents = documents[:dataset_size]
     random.shuffle(documents)
     testset_len = int(len(documents) * __CONFIG__['testset-ratio'])
        
@@ -29,13 +30,17 @@ def run():
         os.makedirs(os.path.join(__CONFIG__['base-folder'], 'classificator'))
         
     print('Loading data ...')
-    positive_documents_train, positive_documents_test = load_documents(os.path.join(__CONFIG__['input-folder'], 'positive'), __CONFIG__['max-dataset-size'])
-    unlabeled_documents_train, unlabeled_documents_test = load_documents(os.path.join(__CONFIG__['input-folder'], 'unlabeled'), __CONFIG__['max-dataset-size']) 
+    max_dataset_size = __CONFIG__['max-dataset-size'] if __CONFIG__['max-dataset-size'] > 0 else None
+    positive_documents_train, positive_documents_test = load_documents(os.path.join(__CONFIG__['input-folder'], 'positive'), max_dataset_size)
+    unlabeled_documents_train, unlabeled_documents_test = load_documents(os.path.join(__CONFIG__['input-folder'], 'unlabeled'), max_dataset_size) 
     # unlabeled means "negative" 
         
     positive_documents_train, unlabeled_documents_train = unskew(positive_documents_train, unlabeled_documents_train)
     positive_documents_test, unlabeled_documents_test = unskew(positive_documents_test, unlabeled_documents_test)
         
+    print('Trainingset size: ' + str(len(positive_documents_train) + len(unlabeled_documents_train)))
+    print('Testset size: ' + str(len(positive_documents_test) + len(unlabeled_documents_test)))
+
     print("Training")
     print('Tokenizing training set ...')
     tokenizer = SimpleGermanTokenizer()
