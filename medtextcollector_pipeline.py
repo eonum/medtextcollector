@@ -1,15 +1,11 @@
+import os
+import pickle
+import random
 from load_config import __CONFIG__
 from tokenizer import SimpleGermanTokenizer
 from vectorizer import bag_of_words
 from nltk import NaiveBayesClassifier
-from nltk.metrics import accuracy, precision, recall, f_measure, ConfusionMatrix
-from pprint import pprint
-import os
-import pickle
-import random
-import nltk
-
-import pdb
+from nltk.metrics import accuracy, ConfusionMatrix
 
 def load_documents(path):
     documents = []
@@ -34,7 +30,8 @@ def run():
         
     print('Loading data ...')
     positive_documents_train, positive_documents_test = load_documents(os.path.join(__CONFIG__['input-folder'], 'positive'))
-    unlabeled_documents_train, unlabeled_documents_test = load_documents(os.path.join(__CONFIG__['input-folder'], 'unlabeled'))
+    unlabeled_documents_train, unlabeled_documents_test = load_documents(os.path.join(__CONFIG__['input-folder'], 'unlabeled')) 
+    # unlabeled means "negative" 
         
     positive_documents_train, unlabeled_documents_train = unskew(positive_documents_train, unlabeled_documents_train)
     positive_documents_test, unlabeled_documents_test = unskew(positive_documents_test, unlabeled_documents_test)

@@ -1,6 +1,9 @@
 jusText==2.2.0
 nltk==3.2.1
+requests==2.12.4
+tldextract==2.0.2
 Unidecode==0.4.19
-beautifulsoup4==4.5.1
-Requests==2.12.1
-scikit_learn==0.18.1
+wikipedia==1.4.0
+beautifulsoup4==4.5.3
+lxml==3.7.3
+readability_lxml==0.6.2
