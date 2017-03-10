@@ -2,7 +2,6 @@ import argparse
 import os
 from hashlib import md5
 
-import pdb
 
 def split_buf_to_documents(buf, output_directory):
     open_index = -1
@@ -17,7 +16,7 @@ def split_buf_to_documents(buf, output_directory):
         document = buf[open_index+2:close_index]
         clean_and_save_document(document, output_directory)
         buf = buf[close_index+2:]
-        
+    return buf
         
 def split_file_to_documents(file_path, output_directory):
     with open(file_path, 'r') as file:
