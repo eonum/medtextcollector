@@ -7,7 +7,7 @@ from vectorizer import bag_of_words
 from nltk import NaiveBayesClassifier
 from nltk.metrics import accuracy, ConfusionMatrix
 
-def load_documents(path):
+def load_documents(path, dataset_size):
     documents = []
     for (dirpath, dirnames, filenames) in os.walk(path):
         for filename in filenames: 
@@ -29,8 +29,8 @@ def run():
         os.makedirs(os.path.join(__CONFIG__['base-folder'], 'classificator'))
         
     print('Loading data ...')
-    positive_documents_train, positive_documents_test = load_documents(os.path.join(__CONFIG__['input-folder'], 'positive'))
-    unlabeled_documents_train, unlabeled_documents_test = load_documents(os.path.join(__CONFIG__['input-folder'], 'unlabeled')) 
+    positive_documents_train, positive_documents_test = load_documents(os.path.join(__CONFIG__['input-folder'], 'positive'), __CONFIG__['max-dataset-size'])
+    unlabeled_documents_train, unlabeled_documents_test = load_documents(os.path.join(__CONFIG__['input-folder'], 'unlabeled'), __CONFIG__['max-dataset-size']) 
     # unlabeled means "negative" 
         
     positive_documents_train, unlabeled_documents_train = unskew(positive_documents_train, unlabeled_documents_train)

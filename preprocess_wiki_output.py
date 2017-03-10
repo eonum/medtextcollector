@@ -17,6 +17,7 @@ def split_buf_to_documents(buf, output_directory):
         clean_and_save_document(document, output_directory)
         buf = buf[close_index+2:]
     return buf
+
         
 def split_file_to_documents(file_path, output_directory):
     with open(file_path, 'r') as file:
