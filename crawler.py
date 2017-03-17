@@ -15,6 +15,7 @@ import json
 import sys
 from classifier import Classifier
 import tldextract
+import time
 
 class Crawler:
     def __init__(self, base_url):
@@ -70,7 +71,7 @@ class Crawler:
         self.sort_and_crop_urls()
         url = self.urls.pop(0)
         self.add_visited_url(url[0])
-        return url[0]
+        return url[0], url[1]
     
     def add_url(self, url):
         if url in self.visited_urls:
@@ -179,7 +180,7 @@ class Crawler:
             self.request_cache[slug] = r
         return r
 
-    def process_url(self, url):
+    def process_url(self, url, p):
         print('Processing ' + url + ' ...')
         r = self.request_from_cache(url)
         
@@ -198,7 +199,8 @@ class Crawler:
             return
         
         if len(content) > 0:               
-            with open(os.path.join(__CONFIG__['base-folder'], 'crawler', 'pages', self.filename_from_url(url)), 'w') as file:       
+            with open(os.path.join(__CONFIG__['base-folder'], 'crawler', 'pages', self.filename_from_url(url)), 'w') as file:
+                print(';'.join(['"%s"' % url, '"%s"' % time.strftime('%d-%m-%y-%H'), '"%s"' % __CONFIG__['classifier-name'], '"%s"'  % str(p)]), file=file)       
                 file.write(content)
             
         for a in soup.find_all('a'):
@@ -206,11 +208,11 @@ class Crawler:
                 self.add_url(self.get_absolute_url(url, a.get('href')))
     
     def crawl(self):
-        url = self.get_next_url()
+        url, p = self.get_next_url()
         while url:
             try:
-                self.process_url(url)
-                url = self.get_next_url()
+                self.process_url(url, p)
+                url, p = self.get_next_url()
             except KeyboardInterrupt:
                 sys.exit()
 

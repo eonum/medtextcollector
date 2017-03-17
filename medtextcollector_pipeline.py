@@ -1,11 +1,13 @@
 import os
 import pickle
 import random
+import time
 from load_config import __CONFIG__
 from tokenizer import SimpleGermanTokenizer
 from vectorizer import bag_of_words
 from nltk import NaiveBayesClassifier
 from nltk.metrics import accuracy, ConfusionMatrix
+from classifier import valid_document
 
 def load_documents(path, dataset_size):
     documents = []
@@ -24,8 +26,11 @@ def unskew(dataset_a, dataset_b):
     min_len = min(len(dataset_a), len(dataset_b))
     return dataset_a[:min_len], dataset_b[:min_len]
 
+def clean(documents):
+    return [doc for doc in documents if valid_document(doc)]
+
 def run():
-    print('Preparing base folder... ')
+    print('Preparing base folder ... ')
     if not os.path.exists(os.path.join(__CONFIG__['base-folder'], 'classificator')):
         os.makedirs(os.path.join(__CONFIG__['base-folder'], 'classificator'))
         
@@ -37,9 +42,6 @@ def run():
         
     positive_documents_train, unlabeled_documents_train = unskew(positive_documents_train, unlabeled_documents_train)
     positive_documents_test, unlabeled_documents_test = unskew(positive_documents_test, unlabeled_documents_test)
-        
-    print('Trainingset size: ' + str(len(positive_documents_train) + len(unlabeled_documents_train)))
-    print('Testset size: ' + str(len(positive_documents_test) + len(unlabeled_documents_test)))
 
     print("Training")
     print('Tokenizing training set ...')
@@ -51,14 +53,19 @@ def run():
     for document in unlabeled_documents_train:
         unlabeled_tokenized_documents_train.append(tokenizer.tokenize(document))
     
+    positive_tokenized_documents_train = clean(positive_tokenized_documents_train)
+    unlabeled_tokenized_documents_train = clean(unlabeled_tokenized_documents_train)
+    positive_tokenized_documents_train, unlabeled_tokenized_documents_train = unskew(positive_tokenized_documents_train, unlabeled_tokenized_documents_train)
+    print('Trainingset size: ' + str(len(positive_tokenized_documents_train) + len(unlabeled_tokenized_documents_train)))
+    
     print('Vectorizing training set ...')
     positive_vectorized_documents_train = [(bag_of_words(tokens), True) for tokens in positive_tokenized_documents_train]
     unlabeled_vectorized_documents_train = [(bag_of_words(tokens), False) for tokens in unlabeled_tokenized_documents_train]
     
     classifier =  NaiveBayesClassifier.train(positive_vectorized_documents_train + unlabeled_vectorized_documents_train)
-    
-    print("Saving model to " + os.path.join(__CONFIG__['base-folder'], 'classificator', 'naive_bayes_model.pickle') + " ...")    
-    with open(os.path.join(__CONFIG__['base-folder'], 'classificator','naive_bayes_model.pickle'), 'wb') as file:
+    model_path = os.path.join(__CONFIG__['base-folder'], 'classificator','naive_bayes_model-%s.pickle' % time.strftime('%d-%m-%y-%H'))
+    print("Saving model to %s ..." % model_path)    
+    with open(model_path, 'wb') as file:
         pickle.dump(classifier, file)
       
     print("Evaluation")  
@@ -69,6 +76,12 @@ def run():
         positive_tokenized_documents_test.append(tokenizer.tokenize(document))
     for document in unlabeled_documents_test:
         unlabeled_tokenized_documents_test.append(tokenizer.tokenize(document))
+    
+    positive_tokenized_documents_test = clean(positive_tokenized_documents_test)
+    unlabeled_tokenized_documents_test = clean(unlabeled_tokenized_documents_test)
+    positive_tokenized_documents_test, unlabeled_tokenized_documents_test = unskew(positive_tokenized_documents_test, unlabeled_tokenized_documents_test)
+    print('Testset size: ' + str(len(positive_tokenized_documents_test) + len(unlabeled_tokenized_documents_test)))
+
 
     print('Vectorizing test set ...')
     positive_vectorized_documents_test = [(bag_of_words(tokens), True) for tokens in positive_tokenized_documents_test]
