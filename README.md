@@ -35,6 +35,8 @@ The crawler can also be started with a non default configuration file using the 
 python crawler.py -c path/to/alternative/configuration.json 
 ```
 
+Note: An archive containing the extracted trainingset and a trained model can be found under titan:/home/arun/archives/medtextcollector_data.tar.gz.
+
 ## Wikipedia
 ### Get some data
 First of all you need one or more db dumps of wikipedia. We recommend that you don't start start with the English dump of wikipedia, because those are the biggest. Because of this we use the German dumps, they are smaller but not too small.
