@@ -1,7 +1,7 @@
 {
     "base-folder": "data/output",
     "input-folder": "data/input",
-    "classifier-name": "naive_bayes_model-17-03-17-14",
+    "classifier-name": "naive_bayes_model-03-05-17-17",
     "crawler-root-url": "http://www.netdoktor.de/krankheiten/",
     "boilerplate-removal": "readability",
     "max_urls": -1,
@@ -9,5 +9,5 @@
     "threshold": 0.8,
     "max-visits-per-tld": -1,
     "max-dataset-size": -1,
-    "doc-min-tokens": 30
+    "doc-min-tokens": 10
 }

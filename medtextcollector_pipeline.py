@@ -8,6 +8,7 @@ from vectorizer import bag_of_words
 from nltk import NaiveBayesClassifier
 from nltk.metrics import accuracy, ConfusionMatrix
 from classifier import valid_document
+import tqdm
 
 def load_documents(path, dataset_size):
     documents = []
@@ -22,7 +23,7 @@ def load_documents(path, dataset_size):
        
     return documents[testset_len:], documents[:testset_len]
 
-def unskew(dataset_a, dataset_b):
+def unskew(dataset_a, dataset_b): 
     min_len = min(len(dataset_a), len(dataset_b))
     return dataset_a[:min_len], dataset_b[:min_len]
 
@@ -48,9 +49,9 @@ def run():
     tokenizer = SimpleGermanTokenizer()
     positive_tokenized_documents_train = []
     unlabeled_tokenized_documents_train = []
-    for document in positive_documents_train:
+    for document in tqdm.tqdm(positive_documents_train):
         positive_tokenized_documents_train.append(tokenizer.tokenize(document))
-    for document in unlabeled_documents_train:
+    for document in tqdm.tqdm(unlabeled_documents_train):
         unlabeled_tokenized_documents_train.append(tokenizer.tokenize(document))
     
     positive_tokenized_documents_train = clean(positive_tokenized_documents_train)
@@ -59,8 +60,8 @@ def run():
     print('Trainingset size: ' + str(len(positive_tokenized_documents_train) + len(unlabeled_tokenized_documents_train)))
     
     print('Vectorizing training set ...')
-    positive_vectorized_documents_train = [(bag_of_words(tokens), True) for tokens in positive_tokenized_documents_train]
-    unlabeled_vectorized_documents_train = [(bag_of_words(tokens), False) for tokens in unlabeled_tokenized_documents_train]
+    positive_vectorized_documents_train = [(bag_of_words(tokens), True) for tokens in tqdm.tqdm(positive_tokenized_documents_train)]
+    unlabeled_vectorized_documents_train = [(bag_of_words(tokens), False) for tokens in tqdm.tqdm(unlabeled_tokenized_documents_train)]
     
     classifier =  NaiveBayesClassifier.train(positive_vectorized_documents_train + unlabeled_vectorized_documents_train)
     model_path = os.path.join(__CONFIG__['base-folder'], 'classificator','naive_bayes_model-%s.pickle' % time.strftime('%d-%m-%y-%H'))
@@ -72,9 +73,9 @@ def run():
     print('Tokenizing test set...')
     positive_tokenized_documents_test = []
     unlabeled_tokenized_documents_test = []
-    for document in positive_documents_test:
+    for document in tqdm.tqdm(positive_documents_test):
         positive_tokenized_documents_test.append(tokenizer.tokenize(document))
-    for document in unlabeled_documents_test:
+    for document in tqdm.tqdm(unlabeled_documents_test):
         unlabeled_tokenized_documents_test.append(tokenizer.tokenize(document))
     
     positive_tokenized_documents_test = clean(positive_tokenized_documents_test)
@@ -84,8 +85,8 @@ def run():
 
 
     print('Vectorizing test set ...')
-    positive_vectorized_documents_test = [(bag_of_words(tokens), True) for tokens in positive_tokenized_documents_test]
-    unlabeled_vectorized_documents_test = [(bag_of_words(tokens), False) for tokens in unlabeled_tokenized_documents_test]
+    positive_vectorized_documents_test = [(bag_of_words(tokens), True) for tokens in tqdm.tqdm(positive_tokenized_documents_test)]
+    unlabeled_vectorized_documents_test = [(bag_of_words(tokens), False) for tokens in tqdm.tqdm(unlabeled_tokenized_documents_test)]
 
     ref = []
     test = []

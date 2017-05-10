@@ -67,7 +67,7 @@ class Crawler:
             
     def get_next_url(self):
         if len(self.urls) == 0:
-            return None
+            return None, None
         self.sort_and_crop_urls()
         url = self.urls.pop(0)
         self.add_visited_url(url[0])
@@ -215,7 +215,9 @@ class Crawler:
                 url, p = self.get_next_url()
             except KeyboardInterrupt:
                 sys.exit()
-
+        if not url:
+            print("Nothing left to crawl. Bye bye.")
+            
 if __name__ == '__main__':
     crawler = Crawler(__CONFIG__['crawler-root-url'])
     crawler.crawl()
