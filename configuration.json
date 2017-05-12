@@ -1,7 +1,7 @@
 {
     "base-folder": "data/output",
     "input-folder": "data/input",
-    "classifier-name": "naive_bayes_model-03-05-17-17",
+    "classifier-name": "pipeline-12-05-17-14",
     "crawler-root-url": "http://www.netdoktor.de/krankheiten/",
     "boilerplate-removal": "readability",
     "max_urls": -1,

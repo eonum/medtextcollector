@@ -5,7 +5,8 @@ from nltk.corpus import stopwords
 class SimpleTokenizer():
     def split_to_words(self, s, delimiter=' '):
         s = re.sub(r'[^\w\s]','',s)
-        return s.split(delimiter)
+        
+        return [e for e in s.split(delimiter) if e != '']
 
 class SimpleGermanTokenizer(SimpleTokenizer):    
     def tokenize(self, s):

@@ -4,11 +4,12 @@ import random
 import time
 from load_config import __CONFIG__
 from tokenizer import SimpleGermanTokenizer
-from vectorizer import bag_of_words
-from nltk import NaiveBayesClassifier
-from nltk.metrics import accuracy, ConfusionMatrix
+from sklearn.metrics import f1_score, confusion_matrix, accuracy_score, precision_score, recall_score
 from classifier import valid_document
 import tqdm
+from sklearn.pipeline import Pipeline
+from sklearn.naive_bayes import MultinomialNB
+from sklearn.feature_extraction.text import TfidfVectorizer
 
 def load_documents(path, dataset_size):
     documents = []
@@ -44,62 +45,39 @@ def run():
     positive_documents_train, unlabeled_documents_train = unskew(positive_documents_train, unlabeled_documents_train)
     positive_documents_test, unlabeled_documents_test = unskew(positive_documents_test, unlabeled_documents_test)
 
-    print("Training")
-    print('Tokenizing training set ...')
+    print("Training ...")
     tokenizer = SimpleGermanTokenizer()
-    positive_tokenized_documents_train = []
-    unlabeled_tokenized_documents_train = []
-    for document in tqdm.tqdm(positive_documents_train):
-        positive_tokenized_documents_train.append(tokenizer.tokenize(document))
-    for document in tqdm.tqdm(unlabeled_documents_train):
-        unlabeled_tokenized_documents_train.append(tokenizer.tokenize(document))
+    gt = []
+    for document in positive_documents_train:
+        gt.append('medical')
+    for document in unlabeled_documents_train:
+        gt.append('nonmedical')
     
-    positive_tokenized_documents_train = clean(positive_tokenized_documents_train)
-    unlabeled_tokenized_documents_train = clean(unlabeled_tokenized_documents_train)
-    positive_tokenized_documents_train, unlabeled_tokenized_documents_train = unskew(positive_tokenized_documents_train, unlabeled_tokenized_documents_train)
-    print('Trainingset size: ' + str(len(positive_tokenized_documents_train) + len(unlabeled_tokenized_documents_train)))
+    pipeline = Pipeline([
+    ('vectorizer',  TfidfVectorizer(tokenizer=tokenizer.tokenize)),
+    ('classifier',  MultinomialNB()) ])
     
-    print('Vectorizing training set ...')
-    positive_vectorized_documents_train = [(bag_of_words(tokens), True) for tokens in tqdm.tqdm(positive_tokenized_documents_train)]
-    unlabeled_vectorized_documents_train = [(bag_of_words(tokens), False) for tokens in tqdm.tqdm(unlabeled_tokenized_documents_train)]
-    
-    classifier =  NaiveBayesClassifier.train(positive_vectorized_documents_train + unlabeled_vectorized_documents_train)
-    model_path = os.path.join(__CONFIG__['base-folder'], 'classificator','naive_bayes_model-%s.pickle' % time.strftime('%d-%m-%y-%H'))
+    pipeline.fit(positive_documents_train + unlabeled_documents_train, gt)
+
+    model_path = os.path.join(__CONFIG__['base-folder'], 'classificator','pipeline-%s.pickle' % time.strftime('%d-%m-%y-%H'))
     print("Saving model to %s ..." % model_path)    
     with open(model_path, 'wb') as file:
-        pickle.dump(classifier, file)
-      
-    print("Evaluation")  
-    print('Tokenizing test set...')
-    positive_tokenized_documents_test = []
-    unlabeled_tokenized_documents_test = []
+        pickle.dump(pipeline, file)
+
+    print('Testing ...')
+    gt_test = []
     for document in tqdm.tqdm(positive_documents_test):
-        positive_tokenized_documents_test.append(tokenizer.tokenize(document))
+        gt_test.append('medical')
     for document in tqdm.tqdm(unlabeled_documents_test):
-        unlabeled_tokenized_documents_test.append(tokenizer.tokenize(document))
+        gt_test.append('nonmedical')
+        
+    predictions = pipeline.predict(positive_documents_test+unlabeled_documents_test)
+    print(confusion_matrix(gt_test, predictions))
+    print('F1: %s'  % f1_score(gt_test, predictions, pos_label='medical'))
+    print('Accuracy: %s' % accuracy_score(gt_test, predictions))
+    print('Precision: %s' % precision_score(gt_test, predictions, pos_label='medical'))
+    print('Recall: %s' % recall_score(gt_test, predictions, pos_label='medical'))
     
-    positive_tokenized_documents_test = clean(positive_tokenized_documents_test)
-    unlabeled_tokenized_documents_test = clean(unlabeled_tokenized_documents_test)
-    positive_tokenized_documents_test, unlabeled_tokenized_documents_test = unskew(positive_tokenized_documents_test, unlabeled_tokenized_documents_test)
-    print('Testset size: ' + str(len(positive_tokenized_documents_test) + len(unlabeled_tokenized_documents_test)))
-
-
-    print('Vectorizing test set ...')
-    positive_vectorized_documents_test = [(bag_of_words(tokens), True) for tokens in tqdm.tqdm(positive_tokenized_documents_test)]
-    unlabeled_vectorized_documents_test = [(bag_of_words(tokens), False) for tokens in tqdm.tqdm(unlabeled_tokenized_documents_test)]
-
-    ref = []
-    test = []
-    
-    for v, l in positive_vectorized_documents_test + unlabeled_vectorized_documents_test:
-        test.append(classifier.prob_classify(v).prob(True))
-        ref.append(l)    
-    
-    for threshold in [0.6, 0.7, 0.8, 0.9]:
-        print('Threshold: %s' % threshold)
-        thresholded = [e > threshold for e in test]
-        print('Accuracy: %s' % accuracy(ref, thresholded))
-        print(ConfusionMatrix(ref, thresholded))
     
 if __name__ == '__main__':
     run()
