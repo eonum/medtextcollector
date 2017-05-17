@@ -18,7 +18,10 @@ class Classifier:
         if self.validity_checks:
             if not valid_document(document):
                 return 0.0
-            if langdetect.detect(document) != self.language:
+            try:
+                if langdetect.detect(document) != self.language:
+                    return 0.0
+            except langdetect.lang_detect_exception.LangDetectException:
                 return 0.0
         
         return self.model.predict_proba([document])[0][0]
