@@ -196,6 +196,7 @@ class Crawler:
             content = self.extract_content(r.content)
         
         if self.content_is_duplicated(content):
+            print(' Duplicated content.')
             return
         
         if len(content) > 0:               
