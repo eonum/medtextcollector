@@ -1,7 +1,7 @@
 from load_config import __CONFIG__
 import requests
 from bs4 import BeautifulSoup
-from urllib.parse import urlparse, urljoin
+from urllib.parse import urlparse, urljoin, urldefrag
 import justext
 import os
 import re
@@ -206,7 +206,10 @@ class Crawler:
             
         for a in soup.find_all('a'):
             if self.scheme_is_http_or_none(a.get('href')):
-                self.add_url(self.get_absolute_url(url, a.get('href')))
+                resulting_url = self.get_absolute_url(url, a.get('href'))
+                if __CONFIG__['urldefrag']:
+                    resulting_url = urldefrag(resulting_url)[0] 
+                self.add_url(resulting_url)
     
     def crawl(self):
         url, p = self.get_next_url()
