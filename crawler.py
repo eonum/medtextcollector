@@ -7,7 +7,7 @@ import os
 import re
 from unidecode import unidecode
 from hashlib import md5
-from readability import Document
+from readability import Document, readability
 from lxml import html
 from operator import itemgetter
 import atexit
@@ -143,9 +143,13 @@ class Crawler:
         return content   
      
     def extract_content_using_readability(self, raw_page):
-        doc = Document(raw_page)    
-        html_doc = html.document_fromstring(doc.summary())
-        return html_doc.text_content()
+        try:
+            doc = Document(raw_page)    
+            html_doc = html.document_fromstring(doc.summary())
+            return html_doc.text_content()
+        except readability.Unparseable:
+            print("Could not be parsed.")
+            return None
     
     def extract_content(self, raw_page):
         if __CONFIG__['boilerplate-removal'] == 'justext':
@@ -194,6 +198,9 @@ class Crawler:
         
         if len(r.content) > 0:
             content = self.extract_content(r.content)
+            
+        if not content:
+            return
         
         if self.content_is_duplicated(content):
             print(' Duplicated content.')
