@@ -103,6 +103,9 @@ class Crawler:
         if len(r.content) > 0:
             content = self.extract_content(r.content)
         
+        if not content:
+            return 0.0
+        
         p = self.classifier.classify(content)
         
         print(" Rating "+ url + " : " + str(p))
