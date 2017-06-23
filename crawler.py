@@ -84,7 +84,12 @@ class Crawler:
         if len(self.urls) == 0:
             return None, None
         self.sort_and_crop_urls()
-        url = self.urls.pop(0)
+        while True:
+            url = self.urls.pop(0)
+            if not self.is_excluded_url(url) and not self.excluded_keyword_in_url(url):
+                break
+        
+        
         self.add_visited_url(url[0])
         return url[0], url[1]
     
