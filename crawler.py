@@ -62,6 +62,13 @@ class Crawler:
             if len(self.urls) > __CONFIG__['max_urls']:
                 self.urls = self.urls[:__CONFIG__['max_urls']]
     
+    def is_excluded_url(self, url):
+        try: 
+            bool(next(x for x in __CONFIG__['excluded-urls'] if url.startswith(x))) 
+        except StopIteration:
+            return False
+        return True
+    
     def add_visited_url(self, url):
         self.visited_urls.append(url)
             
@@ -74,6 +81,8 @@ class Crawler:
         return url[0], url[1]
     
     def add_url(self, url):
+        if self.is_excluded_url(url):
+            return False
         if url in self.visited_urls:
             return False
         
