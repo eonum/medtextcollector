@@ -11,5 +11,6 @@
     "max-dataset-size": -1,
     "doc-min-tokens": 10,
     "urldefrag": true,
-    "excluded-urls": ["http://www.wikipedia."]
+    "excluded-urls": [],
+    "excluded-keywords-url": [""]
 }
