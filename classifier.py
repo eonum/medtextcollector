@@ -24,7 +24,9 @@ class Classifier:
             except langdetect.lang_detect_exception.LangDetectException:
                 return 0.0
         
-        return self.model.predict_proba([document])[0][0]
-
+        p = self.model.predict_proba([document])[0][0]
+        p = 1 - p if __CONFIG__['invert-p'] else p
+        return p
+            
 def valid_document(doc):
     return len(doc) >= __CONFIG__['doc-min-tokens']
