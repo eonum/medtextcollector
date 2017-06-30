@@ -86,7 +86,7 @@ class Crawler:
         self.sort_and_crop_urls()
         while True:
             url = self.urls.pop(0)
-            if not self.is_excluded_url(url) and not self.excluded_keyword_in_url(url):
+            if not self.is_excluded_url(url[0]) and not self.excluded_keyword_in_url(url[0]):
                 break
         
         
