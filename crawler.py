@@ -71,10 +71,10 @@ class Crawler:
     
     def excluded_keyword_in_url(self, url):
         try: 
-            next(x for x in __CONFIG__['excluded-keywords-url'] if x in url) 
+            ret = next(x for x in __CONFIG__['excluded-keywords-url'] if x in url) 
         except StopIteration:
             return False
-        return True
+        return bool(ret)
         
     
     def add_visited_url(self, url):
@@ -88,7 +88,6 @@ class Crawler:
             url = self.urls.pop(0)
             if not self.is_excluded_url(url[0]) and not self.excluded_keyword_in_url(url[0]):
                 break
-        
         
         self.add_visited_url(url[0])
         return url[0], url[1]
