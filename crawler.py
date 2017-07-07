@@ -192,6 +192,7 @@ class Crawler:
         slug = self.slugify(url)
         if slug in self.request_cache:
             r = self.request_cache[slug]
+            self.request_cache.remove(slug)
         else:
             tld = tldextract.extract(url)
             tld = tld.domain + '.' + tld.suffix
