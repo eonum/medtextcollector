@@ -82,6 +82,8 @@ class Crawler:
     def mandatory_keywords_in_url(self, url):
         for keyword in __CONFIG__['mandatory-keywords-url']:
             if keyword not in url:
+                import pdb
+                pdb.set_trace()
                 return False
         return True
     
@@ -94,7 +96,7 @@ class Crawler:
         self.sort_and_crop_urls()
         while True:
             url = self.urls.pop(0)
-            if not self.is_excluded_url(url[0]) and not self.excluded_keyword_in_url(url[0]) and self.mandatory_keywords_in_url(url):
+            if not self.is_excluded_url(url[0]) and not self.excluded_keyword_in_url(url[0]) and self.mandatory_keywords_in_url(url[0]):
                 break
         
         self.add_visited_url(url[0])
