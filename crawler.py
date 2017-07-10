@@ -69,13 +69,21 @@ class Crawler:
             return False
         return True
     
-    def excluded_keyword_in_url(self, url):
+    def keyword_in_url(self, keywords, url):
         try: 
-            ret = next(x for x in __CONFIG__['excluded-keywords-url'] if x in url) 
+            ret = next(x for x in keywords if x in url) 
         except StopIteration:
             return False
         return bool(ret)
         
+    def excluded_keyword_in_url(self, url):
+        return self.keyword_in_url(__CONFIG__['excluded-keywords-url'], url)
+        
+    def mandatory_keywords_in_url(self, url):
+        for keyword in __CONFIG__['mandatory-keywords-url']:
+            if keyword not in url:
+                return False
+        return True
     
     def add_visited_url(self, url):
         self.visited_urls.append(url)
@@ -86,18 +94,17 @@ class Crawler:
         self.sort_and_crop_urls()
         while True:
             url = self.urls.pop(0)
-            if not self.is_excluded_url(url[0]) and not self.excluded_keyword_in_url(url[0]):
+            if not self.is_excluded_url(url[0]) and not self.excluded_keyword_in_url(url[0]) and self.mandatory_keywords_in_url(url):
                 break
         
         self.add_visited_url(url[0])
         return url[0], url[1]
     
     def add_url(self, url):
-        if self.is_excluded_url(url) or self.excluded_keyword_in_url(url):
+        if self.is_excluded_url(url) or self.excluded_keyword_in_url(url) or not self.mandatory_keywords_in_url(url):
             return False
         if url in self.visited_urls:
             return False
-        
         try:
             next(x for x in self.urls if x[0] == url)
         except StopIteration:
@@ -191,8 +198,7 @@ class Crawler:
     def request_from_cache(self, url):
         slug = self.slugify(url)
         if slug in self.request_cache:
-            r = self.request_cache[slug]
-            self.request_cache.remove(slug)
+            r = self.request_cache.pop(slug)
         else:
             tld = tldextract.extract(url)
             tld = tld.domain + '.' + tld.suffix
