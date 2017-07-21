@@ -244,7 +244,7 @@ class Crawler:
             if __CONFIG__['store-raw']:
                 with open(os.path.join(__CONFIG__['base-folder'], 'crawler', 'pages', 'raw', self.filename_from_url(url)), 'w') as file:
                     print('<!-- '+';'.join(['"%s"' % url, '"%s"' % time.strftime('%d-%m-%y-%H'), '"%s"' % __CONFIG__['classifier-name'], '"%s"'  % str(p)]) + '-->', file=file)       
-                    file.write(r.content.decode('utf-8'))
+                    file.write(r.content.decode('utf-8', errors='replace'))
 
         for a in soup.find_all('a'):
             if self.scheme_is_http_or_none(a.get('href')):
