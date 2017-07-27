@@ -1,6 +1,7 @@
 import os
 import tldextract
 import shutil
+import re
 
 def extract_urls(path):
     urls = []
@@ -36,3 +37,14 @@ def extract_documents_by_tlds(tlds, input_path, output_path):
         break # no subdirectories
     
 
+def postprocess_documents_default(input_path, output_path):
+    for (dirpath, dirnames, filenames) in os.walk(input_path):
+        for filename in filenames: 
+            with open(os.path.join(dirpath, filename), 'r') as file:
+                header = file.readline()
+                content = file.read()
+                content = content.strip()
+                content = re.sub(r"(\n)\1{2,}", '\n', content)
+                with open(os.path.join(output_path, filename), 'w') as out_file:
+                    out_file.write(content)
+        break
