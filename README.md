@@ -35,7 +35,8 @@ The crawler can also be started with a non default configuration file using the 
 python crawler.py -c path/to/alternative/configuration.json 
 ```
 
-Note: An archive containing the extracted trainingset and a trained model can be found under titan:/home/arun/archives/medtextcollector_data.tar.gz.
+## Crawler results
+Medical documents: /media/data/medtextcollector/data/output/crawler/pages (and /media/data/medtextcollector/data/output/crawler/pages/raw for the original html pages)
 
 ## Wikipedia
 ### Get some data
