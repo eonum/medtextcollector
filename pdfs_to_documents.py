@@ -3,6 +3,11 @@ import os
 from optparse import OptionParser
 from tqdm import tqdm
 import PyPDF2
+from wand.image import Image
+from PIL import Image as PI
+import pyocr
+import pyocr.builders
+import io
 #import slate
 
 def pdf_to_text_PyPDF2(path):
@@ -13,7 +18,26 @@ def pdf_to_text_PyPDF2(path):
             page = pdf_reader.getPage(i)
             document += page.extractText()
         return document
-    
+
+def pdf_to_text_pyocr(path):
+    # https://pythontips.com/2016/02/25/ocr-on-pdf-files-using-python/
+    req_image = []
+    final_text = []
+    tool = pyocr.get_available_tools()[0]
+    lang = tool.get_available_languages()[1]
+    image_pdf = Image(filename=path, resolution=300)
+    image_jpeg = image_pdf.convert('jpeg')
+    for img in image_jpeg.sequence:
+        img_page = Image(image=img)
+        req_image.append(img_page.make_blob('jpeg'))    
+    for img in req_image: 
+        txt = tool.image_to_string(
+            PI.open(io.BytesIO(img)),
+            lang=lang,
+            builder=pyocr.builders.TextBuilder()
+        )
+        final_text.append(txt)
+    return '\n'.join(final_text)
 
 #def pdf_to_text(path):
 #    with open(path, 'rb') as pdf_file:
@@ -45,5 +69,8 @@ if __name__ == '__main__':
     
     for (dirpath, dirnames, filenames) in os.walk(options.input):
         for filename in tqdm(filenames):
-            os.system("pdftotext -enc UTF-8 '" + os.path.join(dirpath, filename) + "' '" + os.path.join(options.output, os.path.basename(dirpath)+filename)+".txt'")
+            document = pdf_to_text_pyocr(os.path.join(dirpath, filename))
+            with open(os.path.join(options.output, os.path.basename(dirpath)+filename), 'w') as out_file:
+                out_file.write(document)
+            #os.system("pdftotext -enc UTF-8 '" + os.path.join(dirpath, filename) + "' '" + os.path.join(options.output, os.path.basename(dirpath)+filename)+".txt'")
             
