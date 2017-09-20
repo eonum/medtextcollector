@@ -1,6 +1,7 @@
 import argparse
 import os
 from hashlib import md5
+import re
 
 
 def split_buf_to_documents(buf, output_directory):
@@ -31,12 +32,68 @@ def split_file_to_documents(file_path, output_directory):
 
 
 def clean_and_save_document(document, output_directory):
-    document = clean_document(document)
+    document = remove_picture_annotations(document)
+    document = remove_title(document)
+    #document = remove_wiki_links(document)
+    document = remove_newlines(document)
+
+    # replace all multiple whitespaces with a single one
+    document = re.sub( '\s+', ' ', document).strip()
+
+    #document = clean_document(document)
     filename = generate_output_filename(document)
     with open(os.path.join(output_directory, filename), 'w') as file:
         file.write(document)
-    
-    
+
+def remove_picture_annotations(document):
+    # remove picture annotations of the form "\nDatei: ... \n in wiki dumps"
+    re.DOTALL = True
+    document = re.sub('\\\\nDatei:(.+?)\\\\n', ' ', document)
+    document = re.sub('>Datei:(.+?)\\\\n', ' ', document)
+    document = re.sub('> Datei:(.+?)\\\\n', ' ', document)
+
+    return document
+
+
+def remove_title(document):
+    # remove title annotations from wiki dumps
+    return re.sub('<!--(.+?)-->', " " + r'\1' + " ", document)
+
+
+def remove_newlines(document):
+    document = re.sub('\n', ' ', document)
+    document = re.sub('\\n', ' ', document)
+    document = re.sub('\\\\n', ' ', document)
+
+    return document
+
+
+# def remove_wiki_links(document):
+#     itr = re.finditer('\[\[(.*?)\]\]', document)
+#     doc = []
+#     left = 0
+#     right = 0
+#     for match in itr:
+#         span = match.span()
+#         text = match.group()
+#
+#         if '|' in text:
+#             replacement = text.split('|')[1]
+#             right = span[0]
+#             doc.append(document[left:right] + replacement)
+#             left = span[1]
+#
+#     doc.append(document[left:])
+#
+#     output = "".join(doc)
+#     output = re.sub('\[\[', ' ', output)
+#     output = re.sub('\]\]', ' ', output)
+#
+#     return output
+
+
+
+
 def clean_document(document):
     unwanted_chars= ['[', ']', '(', ')', '&', '/', '-', '<', '>', '|', '*', '!', ':', '']
     clean_document = ''
