@@ -15,14 +15,6 @@ def pdf_to_text_PyPDF2(path):
         return document
     
 
-#def pdf_to_text(path):
-#    with open(path, 'rb') as pdf_file:
-#        pdf_doc = slate.PDF(pdf_file)
-#        document = ''
-#        for page in pdf_doc:
-#            document += page
-#        return document
-
 if __name__ == '__main__':
     parser = OptionParser()
     parser.add_option("-i", "--input", dest="input", help="specify input folder")
@@ -46,4 +38,6 @@ if __name__ == '__main__':
     for (dirpath, dirnames, filenames) in os.walk(options.input):
         for filename in tqdm(filenames):
             os.system("pdftotext -enc UTF-8 '" + os.path.join(dirpath, filename) + "' '" + os.path.join(options.output, os.path.basename(dirpath)+filename)+".txt'")
+
+
             
