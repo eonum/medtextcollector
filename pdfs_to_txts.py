@@ -91,13 +91,14 @@ if __name__ == '__main__':
                 # some files might be faulty (e.g. empty, corrupted..)
                 try:
                     foundFonts = hasFonts(file_src)
+                    text = pdf_to_text_PyPDF2(file_src)
                 except:
                     faulty_pdfs += 1
                     continue
 
                 # Files which have fonts might be plain text or preprocessed by OCR
                 if foundFonts:
-                    text = pdf_to_text_PyPDF2(file_src)
+
                     if any(c in text for c in ['ä', 'Ä', 'ü', 'Ü', 'ö', 'Ö']):
                         machine_pdfs += 1
 
