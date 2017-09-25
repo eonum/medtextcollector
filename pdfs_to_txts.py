@@ -101,7 +101,7 @@ if __name__ == '__main__':
                     if any(c in text for c in ['ä', 'Ä', 'ü', 'Ü', 'ö', 'Ö']):
                         machine_pdfs += 1
 
-                        output_src = os.path.join(dirpath, fn + '.txt')
+                        output_src = os.path.join(options.output, fn + '.txt')
                         with open(output_src, "w") as text_file:
                              print(text, file=text_file)
 
