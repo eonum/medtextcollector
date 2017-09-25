@@ -5,6 +5,7 @@ import os
 from tqdm import tqdm
 from optparse import OptionParser
 from PyPDF2 import PdfFileReader
+import math
 
 
 def pdf_to_text_PyPDF2(path):
@@ -56,7 +57,13 @@ def hasFonts(fname):
 
     return False
 
+def outFolderName(prefix, nFiles, filesPerFolder):
+    if (not filesPerFolder > 0):
+        print("invalid number of files per folder")
+        return
 
+    suffix = str(math.floor(nFiles / filesPerFolder))
+    return str(prefix) + suffix
 
 
 if __name__ == '__main__':
@@ -64,6 +71,9 @@ if __name__ == '__main__':
     parser.add_option("-i", "--input", dest="input", help="specify input folder")
     parser.add_option("-o", "--output", dest="output", help="specify output folder")
     (options, args) = parser.parse_args()
+
+    options.input = str(options.input)
+    options.output = str(options.output)
 
     # Check directories
     if not options.input:
@@ -79,6 +89,8 @@ if __name__ == '__main__':
     ocr_pdfs = 0
     scanned_pdfs = 0
     faulty_pdfs = 0
+
+    saved_files = 0
 
     print("Start walking through directory.")
     for (dirpath, dirnames, filenames) in os.walk(options.input):
@@ -102,9 +114,17 @@ if __name__ == '__main__':
                     if any(c in text for c in ['ä', 'Ä', 'ü', 'Ü', 'ö', 'Ö']):
                         machine_pdfs += 1
 
-                        output_src = os.path.join(options.output, fn + '.txt')
+                        # create folders with maximal 1000 files
+                        out_dir = outFolderName("txtFiles", saved_files, 1000)
+                        out_path = os.path.join(options.output, out_dir)
+                        if not os.path.exists(out_path):
+                            os.makedirs(out_path)
+
+                        output_src = os.path.join(out_path, fn + '.txt')
                         with open(output_src, "w") as text_file:
                              print(text, file=text_file)
+
+                        saved_files += 1
 
                     else:
                         ocr_pdfs += 1
