@@ -13,7 +13,7 @@ def pdf_to_text_PyPDF2(path):
             page = pdf_reader.getPage(i)
             document += page.extractText()
         return document
-    
+
 
 if __name__ == '__main__':
     parser = OptionParser()
