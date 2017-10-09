@@ -2,14 +2,19 @@
 Scripts for the collection of free online medical texts and definitions
 
 ## Dependencies
-The list of dependencies can be found under requirements.txt. You can use pip to automatically install all of these requirements:
+The list of dependencies can be found under requirements.txt. You can use pip to
+automatically install all of these requirements:
 
 ```
 pip install -r requirements.txt
 ```
+Ensure to have pdfminer3k (might be overwritten by automated requirements
+generation.
 
 ## Getting started
-Make sure that the data directory is present and contains the input folder with positive and unlabeled (i.e. "negative") samples as configured in configuration.json.
+Make sure that the data directory is present and contains the input folder with
+positive and unlabeled (i.e. "negative") samples as configured in
+configuration.json.
 
 Run the medtextcollector_pipeline in order to train the models:
 ```

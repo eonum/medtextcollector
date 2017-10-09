@@ -1,5 +1,10 @@
-## script to extract texts from PDFs
-## based on https://gist.github.com/tiarno/8a2995e70cee42f01e79
+# script to extract texts from PDFs
+# based on https://gist.github.com/tiarno/8a2995e70cee42f01e79
+
+# usage example: python3 pdfs_to_txts.py -i
+# /media/data/medical_books_neu/articles13
+#          -o data/articles13_txt
+
 
 import os
 from tqdm import tqdm
