@@ -91,8 +91,9 @@ ENV/
 # data folder with wikipedia dumps in it
 data/
 
-# pydev
+# pydev / pycharm
 .project
 .pydevproject
+.idea/
 
 
