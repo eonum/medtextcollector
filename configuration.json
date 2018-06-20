@@ -1,8 +1,9 @@
+
 {
     "base-folder": "data/output",
     "input-folder": "data/input",
     "classifier-name": "pipeline-12-05-17-14",
-    "crawler-root-url": "http://www.wikipedia.org",
+    "crawler-root-url": "http://www.netdoktor.de/krankheiten/",
     "boilerplate-removal": "readability",
     "max_urls": -1,
     "testset-ratio": 0.1,
@@ -12,5 +13,8 @@
     "doc-min-tokens": 10,
     "urldefrag": true,
     "excluded-urls": [],
-    "excluded-keywords-url": [""]
+    "excluded-keywords-url": ["wikipedia"],
+    "invert-p": false,
+    "mandatory-keywords-url": [],
+    "store-raw": true
 }

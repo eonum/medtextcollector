@@ -29,7 +29,7 @@ if __name__ == '__main__':
     sentence_detector = nltk.data.load('tokenizers/punkt/german.pickle')
     with open(options.output, 'w') as out_file:
         for (dirpath, dirnames, filenames) in os.walk(options.input):
-            for filename in tqdm(filenames[:10]): 
+            for filename in tqdm(filenames): 
                 with open(os.path.join(dirpath, filename), 'r') as file:
                     header = file.readline()
                     content = file.read()
