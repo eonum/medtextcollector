@@ -58,4 +58,4 @@ class Configuration(object):
     def __getitem__(self, item):
         return self.parse(self.config[item])
         
-__CONFIG__ = load_config()
+#__CONFIG__ = load_config()
