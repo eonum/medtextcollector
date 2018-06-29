@@ -1,4 +1,5 @@
 import os
+import random
 from tokenizer import SimpleGermanTokenizer
 from tqdm import tqdm
 from operator import itemgetter
@@ -20,3 +21,25 @@ def get_token_frequencies(directory):
 def get_sorted_tokens(directory, n=None):
     token_frequencies = get_token_frequencies(directory)
     return sorted(token_frequencies.items(), key=itemgetter(1), reverse=True)[:n]
+
+def load_documents(file_names):
+    documents = []
+    load_errors = []
+    for filename in file_names: 
+        with open(filename, 'r') as file:
+            try:
+                documents.append(file.read())
+            except UnicodeDecodeError:
+                load_errors.append(filename)
+    random.shuffle(documents)
+    return documents, load_errors
+
+def get_files_from_folder(path):
+    file_names = []
+    for (dirpath, dirnames, subfilenames) in os.walk(path):
+        for filename in subfilenames: 
+            file_names.append((os.path.join(dirpath, filename)))
+    return file_names
+
+def extract_sentences(content, sentence_detector):
+    return [sentence.replace('\n', ' ') for sentence in sentence_detector.tokenize(content) if not sentence.isspace()]
