@@ -13,53 +13,64 @@ File.readlines(categories_file).each do |line|
   categories << line
 end
 
-matched_articles = []
-
-# TODO replace counter with Hash
 counter = 0
+negative_counter = 0
 
 docstream = XML::Reader.file wiki_dump_file
 while docstream.read
   if (docstream.name == 'text')
     docstream.read
     content = docstream.value
+    found_category = false
     categories.each do |category|
       if content.include?("[[Kategorie:#{category}]]")
         # category found
+        found_category = true
+        clean_and_write_article wiki_output_folder + "/positive/clean_extract_", content
 
-        content = content.gsub(/<ref(.*?)<\/ref>/, " ")
-        content = content.gsub(/== Literatur ==(.*?)==/, " ")
-        content = content.gsub(/== Weblinks ==(.*?)==/, " ")
-        content = content.gsub(/== Einzelnachweise ==(.*?)==/, " ")
-        content = content.gsub(/\[\[/, " ")
-        content = content.gsub(/\]\]/, " ")
-        content = content.gsub(/<ref(.*?)>/, " ")
-        content = content.gsub(/\'\'{{lang(.*?)\'\'/, " ")
-        content = content.gsub(/{{lang(.*?)}}/, " ")
-        content = content.gsub(/=====/, " ")
-        content = content.gsub(/====/, " ")
-        content = content.gsub(/===/, " ")
-        content = content.gsub(/==/, " ")
-        content = content.gsub(/'''''/, " ")
-        content = content.gsub(/''''/, " ")
-        content = content.gsub(/'''/, " ")
-        content = content.gsub(/''/, " ")
-        content = content.gsub(/\*\*\*\*\*/, " ")
-        content = content.gsub(/\*\*\*\*/, " ")
-        content = content.gsub(/\*\*\*/, " ")
-        content = content.gsub(/\*\*/, " ")
-        content = content.gsub(/\{\|(.*?)\|\}/, " ")
-        content = content.gsub(/\{\{(.*?)\}\}/, " ")
-        content = content.gsub(/&nbsp\;/, " ")
-
-        File.open(wiki_output_folder + "/clean_extract_" + "#{counter}", "w") do |f|
-          f.write content
-        end
-        if( counter % 10 == 0)
+        if (counter % 10 == 0)
           puts "Processing matched article nr. " + counter.to_s
         end
         counter += 1
       end
     end
+
+    if not found_category
+      if negative_counter < counter
+        clean_and_write_article wiki_output_folder + "/negative/clean_extract_", content
+        negative_counter += 1
+      end
+    end
+  end
+end
+
+def clean_and_write_article file_prefix, content
+  content = content.gsub(/<ref(.*?)<\/ref>/, " ")
+  content = content.gsub(/== Literatur ==(.*?)==/, " ")
+  content = content.gsub(/== Weblinks ==(.*?)==/, " ")
+  content = content.gsub(/== Einzelnachweise ==(.*?)==/, " ")
+  content = content.gsub(/\[\[/, " ")
+  content = content.gsub(/\]\]/, " ")
+  content = content.gsub(/<ref(.*?)>/, " ")
+  content = content.gsub(/\'\'{{lang(.*?)\'\'/, " ")
+  content = content.gsub(/{{lang(.*?)}}/, " ")
+  content = content.gsub(/=====/, " ")
+  content = content.gsub(/====/, " ")
+  content = content.gsub(/===/, " ")
+  content = content.gsub(/==/, " ")
+  content = content.gsub(/'''''/, " ")
+  content = content.gsub(/''''/, " ")
+  content = content.gsub(/'''/, " ")
+  content = content.gsub(/''/, " ")
+  content = content.gsub(/\*\*\*\*\*/, " ")
+  content = content.gsub(/\*\*\*\*/, " ")
+  content = content.gsub(/\*\*\*/, " ")
+  content = content.gsub(/\*\*/, " ")
+  content = content.gsub(/\{\|(.*?)\|\}/, " ")
+  content = content.gsub(/\{\{(.*?)\}\}/, " ")
+  content = content.gsub(/&nbsp\;/, " ")
+
+  File.open(file_prefix + "#{Digest::MD5.hexdigest(content)}", "w") do |f|
+    f.write content
   end
 end
