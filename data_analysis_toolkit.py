@@ -4,6 +4,7 @@ from tokenizer import SimpleGermanTokenizer
 from tqdm import tqdm
 from operator import itemgetter
 
+# TODO: can probably be deleted or should be replaced with nltk.FreqDist
 def get_token_frequencies(directory):
     tokenizer = SimpleGermanTokenizer()
     token_frequencies = {}
@@ -18,6 +19,7 @@ def get_token_frequencies(directory):
                         token_frequencies[t] = 1
     return token_frequencies
 
+# TODO: can probably be deleted or should be replaced with nltk.FreqDist
 def get_sorted_tokens(directory, n=None):
     token_frequencies = get_token_frequencies(directory)
     return sorted(token_frequencies.items(), key=itemgetter(1), reverse=True)[:n]
