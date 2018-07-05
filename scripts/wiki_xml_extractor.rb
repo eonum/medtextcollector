@@ -1,6 +1,10 @@
 require 'rubygems'
 require 'nokogiri'
 
+wiki_dump_file = ARGV[0]
+wiki_output_folder = ARGV[1]
+categories_file = ARGV[2]
+
 # This program dumpxml2wiki reads mediawiki xml files dumped by dumpBackup.php
 # on the current directory and transforms them into wiki files which can then
 # be modified and uploaded again by pywikipediabot using pagefromfile.py on a mediawiki family site.
@@ -8,11 +12,11 @@ require 'nokogiri'
 # an html comment: this is required by pagefromfile.py.
 #
 counter = 1
-Dir.glob("../data/dewiki-latest-pages-articles*").each do |filename|
+Dir.glob(wiki_dump_file).each do |filename|
   input = Nokogiri::XML(File.new(filename), nil, 'UTF-8')
   puts filename.to_s  # prints the name of each .xml file
 
-  File.open("../data/out_dewiki-latest-pages-articles" + "#{counter}" + ".wiki", "w") do |f|
+  File.open(wiki_output_folder + "/out_dewiki-latest-pages-articles" + "#{counter}" + ".wiki", "w") do |f|
     input.xpath("//xmlns:text").each do |n|
       pptitle = n.parent.parent.at_css "title" # searching for the title
       title = pptitle.content
@@ -28,7 +32,7 @@ end
 
 counter = 1                                                             # reset counter to 1
 
-Dir.glob("../data/out_dewiki-latest-pages-articles1*", ).each do |file|
+Dir.glob(wiki_output_folder + "/out_dewiki-latest-pages-articles1*", ).each do |file|
   content = []
   File.open(file, "r:UTF-8") do |f|
     file_content = f.read
@@ -45,7 +49,7 @@ Dir.glob("../data/out_dewiki-latest-pages-articles1*", ).each do |file|
 
   # get the categories from the categories-files
   categories = []
-  File.readlines('../data/categories').each do |line|
+  File.readlines(categories_file).each do |line|
     line = line.gsub(/\n/, "")
     categories << line
   end; nil
@@ -93,7 +97,7 @@ Dir.glob("../data/out_dewiki-latest-pages-articles1*", ).each do |file|
   end;nil
 
   # export the clean articles to a new file
-  File.open("../data/clean_extract" + "#{counter}", "w") do |f|
+  File.open(wiki_output_folder + "/clean_extract" + "#{counter}", "w") do |f|
     matched_articles.each do |article|
       f.write article
     end
