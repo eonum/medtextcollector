@@ -8,7 +8,7 @@ end
 
 puts("Total number of categories: " + arr.length.to_s)
 
-key_words = ["medizin"]
+key_words = ["medizin", "gesundheit", "krankheit", "epidemiologie", "psychologie", "diagnostik", "therapie", "anatomie"]
 c = 0
 
 File.open(ARGV[1], "w+") do |f|
