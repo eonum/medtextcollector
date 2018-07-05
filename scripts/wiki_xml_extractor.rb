@@ -1,5 +1,5 @@
 require 'rubygems'
-require 'nokogiri'
+require 'xml'
 
 wiki_dump_file = ARGV[0]
 wiki_output_folder = ARGV[1]
@@ -18,7 +18,17 @@ matched_articles = []
 # TODO replace counter with Hash
 counter = 0
 
-input = Nokogiri::XML(File.new(filename), nil, 'UTF-8')
+docstream = XML::Reader.file wiki_dump_file
+while not (docstream.node_type == XML::Reader::TYPE_ELEMENT && docstream.name == 'xmlns:text')
+  docstream.read
+end
+# We're at the beginning of the interesting_tag; advance to its contents
+docstream.read
+puts "Interesting value: #{docstream.value}"
+
+exit
+
+input = Nokogiri::XML(File.new(wiki_dump_file), nil, 'UTF-8')
 input.xpath("//xmlns:text").each do |n|
   pptitle = n.parent.parent.at_css "title" # searching for the title
   title = pptitle.content.to_s
