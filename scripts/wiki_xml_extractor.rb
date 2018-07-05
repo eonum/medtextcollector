@@ -1,5 +1,7 @@
 require 'rubygems'
+# gem install libxml-ruby
 require 'xml'
+require 'digest'
 
 wiki_dump_file = ARGV[0]
 wiki_output_folder = ARGV[1]
