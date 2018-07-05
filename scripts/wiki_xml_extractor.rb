@@ -20,15 +20,11 @@ counter = 0
 
 docstream = XML::Reader.file wiki_dump_file
 while docstream.read
-  if (docstream.node_type == XML::Reader::TYPE_ELEMENT && docstream.name == 'text')
-    if( count %100 == 0)
-      puts "Processing matched article nr. " + counter.to_s
-    end
-
+  if (docstream.name == 'text')
+    docstream.read
     content = docstream.value
-
     categories.each do |category|
-      if article.include?("[[Kategorie:#{category}]]")
+      if content.include?("[[Kategorie:#{category}]]")
         # category found
 
         content = content.gsub(/<ref(.*?)<\/ref>/, " ")
@@ -57,10 +53,11 @@ while docstream.read
         content = content.gsub(/&nbsp\;/, " ")
 
         File.open(wiki_output_folder + "/clean_extract_" + "#{counter}", "w") do |f|
-          f.write title + "\n"
           f.write content
         end
-
+        if( counter % 10 == 0)
+          puts "Processing matched article nr. " + counter.to_s
+        end
         counter += 1
       end
     end
