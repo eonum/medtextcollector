@@ -5,6 +5,37 @@ wiki_dump_file = ARGV[0]
 wiki_output_folder = ARGV[1]
 categories_file = ARGV[2]
 
+def clean_and_write_article file_prefix, content
+  content = content.gsub(/<ref(.*?)<\/ref>/, " ")
+  content = content.gsub(/== Literatur ==(.*?)==/, " ")
+  content = content.gsub(/== Weblinks ==(.*?)==/, " ")
+  content = content.gsub(/== Einzelnachweise ==(.*?)==/, " ")
+  content = content.gsub(/\[\[/, " ")
+  content = content.gsub(/\]\]/, " ")
+  content = content.gsub(/<ref(.*?)>/, " ")
+  content = content.gsub(/\'\'{{lang(.*?)\'\'/, " ")
+  content = content.gsub(/{{lang(.*?)}}/, " ")
+  content = content.gsub(/=====/, " ")
+  content = content.gsub(/====/, " ")
+  content = content.gsub(/===/, " ")
+  content = content.gsub(/==/, " ")
+  content = content.gsub(/'''''/, " ")
+  content = content.gsub(/''''/, " ")
+  content = content.gsub(/'''/, " ")
+  content = content.gsub(/''/, " ")
+  content = content.gsub(/\*\*\*\*\*/, " ")
+  content = content.gsub(/\*\*\*\*/, " ")
+  content = content.gsub(/\*\*\*/, " ")
+  content = content.gsub(/\*\*/, " ")
+  content = content.gsub(/\{\|(.*?)\|\}/, " ")
+  content = content.gsub(/\{\{(.*?)\}\}/, " ")
+  content = content.gsub(/&nbsp\;/, " ")
+
+  File.open(file_prefix + "#{Digest::MD5.hexdigest(content)}", "w") do |f|
+    f.write content
+  end
+end
+
 # This program dumpxml2wiki reads mediawiki xml file and transforms them into wiki files.
 
 categories = []
@@ -41,36 +72,5 @@ while docstream.read
         negative_counter += 1
       end
     end
-  end
-end
-
-def clean_and_write_article file_prefix, content
-  content = content.gsub(/<ref(.*?)<\/ref>/, " ")
-  content = content.gsub(/== Literatur ==(.*?)==/, " ")
-  content = content.gsub(/== Weblinks ==(.*?)==/, " ")
-  content = content.gsub(/== Einzelnachweise ==(.*?)==/, " ")
-  content = content.gsub(/\[\[/, " ")
-  content = content.gsub(/\]\]/, " ")
-  content = content.gsub(/<ref(.*?)>/, " ")
-  content = content.gsub(/\'\'{{lang(.*?)\'\'/, " ")
-  content = content.gsub(/{{lang(.*?)}}/, " ")
-  content = content.gsub(/=====/, " ")
-  content = content.gsub(/====/, " ")
-  content = content.gsub(/===/, " ")
-  content = content.gsub(/==/, " ")
-  content = content.gsub(/'''''/, " ")
-  content = content.gsub(/''''/, " ")
-  content = content.gsub(/'''/, " ")
-  content = content.gsub(/''/, " ")
-  content = content.gsub(/\*\*\*\*\*/, " ")
-  content = content.gsub(/\*\*\*\*/, " ")
-  content = content.gsub(/\*\*\*/, " ")
-  content = content.gsub(/\*\*/, " ")
-  content = content.gsub(/\{\|(.*?)\|\}/, " ")
-  content = content.gsub(/\{\{(.*?)\}\}/, " ")
-  content = content.gsub(/&nbsp\;/, " ")
-
-  File.open(file_prefix + "#{Digest::MD5.hexdigest(content)}", "w") do |f|
-    f.write content
   end
 end
