@@ -19,56 +19,50 @@ matched_articles = []
 counter = 0
 
 docstream = XML::Reader.file wiki_dump_file
-while not (docstream.node_type == XML::Reader::TYPE_ELEMENT && docstream.name == 'xmlns:text')
-  docstream.read
-end
-# We're at the beginning of the interesting_tag; advance to its contents
-docstream.read
-puts "Interesting value: #{docstream.value}"
+while docstream.read
+  if (docstream.node_type == XML::Reader::TYPE_ELEMENT && docstream.name == 'text')
+    if( count %100 == 0)
+      puts "Processing matched article nr. " + counter.to_s
+    end
 
-exit
+    content = docstream.value
 
-input = Nokogiri::XML(File.new(wiki_dump_file), nil, 'UTF-8')
-input.xpath("//xmlns:text").each do |n|
-  pptitle = n.parent.parent.at_css "title" # searching for the title
-  title = pptitle.content.to_s
-  content = n.content
+    categories.each do |category|
+      if article.include?("[[Kategorie:#{category}]]")
+        # category found
 
-  categories.each do |category|
-    if article.include?("[[Kategorie:#{category}]]")
-      # category found
+        content = content.gsub(/<ref(.*?)<\/ref>/, " ")
+        content = content.gsub(/== Literatur ==(.*?)==/, " ")
+        content = content.gsub(/== Weblinks ==(.*?)==/, " ")
+        content = content.gsub(/== Einzelnachweise ==(.*?)==/, " ")
+        content = content.gsub(/\[\[/, " ")
+        content = content.gsub(/\]\]/, " ")
+        content = content.gsub(/<ref(.*?)>/, " ")
+        content = content.gsub(/\'\'{{lang(.*?)\'\'/, " ")
+        content = content.gsub(/{{lang(.*?)}}/, " ")
+        content = content.gsub(/=====/, " ")
+        content = content.gsub(/====/, " ")
+        content = content.gsub(/===/, " ")
+        content = content.gsub(/==/, " ")
+        content = content.gsub(/'''''/, " ")
+        content = content.gsub(/''''/, " ")
+        content = content.gsub(/'''/, " ")
+        content = content.gsub(/''/, " ")
+        content = content.gsub(/\*\*\*\*\*/, " ")
+        content = content.gsub(/\*\*\*\*/, " ")
+        content = content.gsub(/\*\*\*/, " ")
+        content = content.gsub(/\*\*/, " ")
+        content = content.gsub(/\{\|(.*?)\|\}/, " ")
+        content = content.gsub(/\{\{(.*?)\}\}/, " ")
+        content = content.gsub(/&nbsp\;/, " ")
 
-      content = content.gsub(/<ref(.*?)<\/ref>/, " ")
-      content = content.gsub(/== Literatur ==(.*?)==/, " ")
-      content = content.gsub(/== Weblinks ==(.*?)==/, " ")
-      content = content.gsub(/== Einzelnachweise ==(.*?)==/, " ")
-      content = content.gsub(/\[\[/, " ")
-      content = content.gsub(/\]\]/, " ")
-      content = content.gsub(/<ref(.*?)>/, " ")
-      content = content.gsub(/\'\'{{lang(.*?)\'\'/, " ")
-      content = content.gsub(/{{lang(.*?)}}/, " ")
-      content = content.gsub(/=====/, " ")
-      content = content.gsub(/====/, " ")
-      content = content.gsub(/===/, " ")
-      content = content.gsub(/==/, " ")
-      content = content.gsub(/'''''/, " ")
-      content = content.gsub(/''''/, " ")
-      content = content.gsub(/'''/, " ")
-      content = content.gsub(/''/, " ")
-      content = content.gsub(/\*\*\*\*\*/, " ")
-      content = content.gsub(/\*\*\*\*/, " ")
-      content = content.gsub(/\*\*\*/, " ")
-      content = content.gsub(/\*\*/, " ")
-      content = content.gsub(/\{\|(.*?)\|\}/, " ")
-      content = content.gsub(/\{\{(.*?)\}\}/, " ")
-      content = content.gsub(/&nbsp\;/, " ")
+        File.open(wiki_output_folder + "/clean_extract_" + "#{counter}", "w") do |f|
+          f.write title + "\n"
+          f.write content
+        end
 
-      File.open(wiki_output_folder + "/clean_extract_" + "#{counter}", "w") do |f|
-        f.write title + "\n"
-        f.write content
+        counter += 1
       end
-
-      counter += 1
     end
   end
 end
