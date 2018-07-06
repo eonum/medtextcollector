@@ -8,17 +8,19 @@ wiki_output_folder = ARGV[1]
 categories_file = ARGV[2]
 
 def clean_and_write_article file_prefix, content
-  content = content.gsub(/<ref(.*?)<\/ref>/, " ")
+  content = content.gsub(/<ref(.*?)<\/ref>/m, " ")
   content = content.gsub(/== Literatur ==(.*?)==/, " ")
   content = content.gsub(/== Weblinks ==(.*?)==/, " ")
   content = content.gsub(/== Einzelnachweise ==(.*?)==/, " ")
   content = content.gsub(/ Einzelnachweise (.*?)\n/, " ")
-  content = content.gsub(/<!--(.*?)-->/, " ")
+  content = content.gsub(/<!--(.*?)-->/m, " ")
   content = content.gsub(/Kategorie(.*?)\n/, " ")
+  content = content.gsub(/ Datei:(.*?)\n/, " ")
+  content = content.gsub(/:{(.*?)}/m, " ")
   content = content.gsub(/#REDIRECT(.*?)\n/, " ")
   content = content.gsub(/\[\[/, " ")
   content = content.gsub(/\]\]/, " ")
-  content = content.gsub(/<ref(.*?)>/, " ")
+  content = content.gsub(/<ref(.*?)>/m, " ")
   content = content.gsub(/\'\'{{lang(.*?)\'\'/, " ")
   content = content.gsub(/{{lang(.*?)}}/, " ")
   content = content.gsub(/=====/, " ")
@@ -33,13 +35,21 @@ def clean_and_write_article file_prefix, content
   content = content.gsub(/\*\*\*\*/, " ")
   content = content.gsub(/\*\*\*/, " ")
   content = content.gsub(/\*\*/, " ")
-  content = content.gsub(/\{\|(.*?)\|\}/, " ")
-  content = content.gsub(/\{\{(.*?)\}\}/, " ")
+  content = content.gsub(/\{\|(.*?)\|\}/m, " ")
+  content = content.gsub(/\{\{(.*?)\}\}/m, " ")
   content = content.gsub(/&nbsp\;/, " ")
 
-  File.open(file_prefix + "#{Digest::MD5.hexdigest(content)}", "w") do |f|
+  content = content.strip
+  return false if content == ''
+
+  filename = file_prefix + "#{Digest::MD5.hexdigest(content)}"
+  return false if File.exist?(filename)
+
+  File.open(filename, "w") do |f|
     f.write content
   end
+
+  return true
 end
 
 # This program dumpxml2wiki reads mediawiki xml file and transforms them into wiki files.
@@ -63,22 +73,17 @@ while docstream.read
       if content.include?("[[Kategorie:#{category}]]")
         # category found
         found_category = true
-        clean_and_write_article wiki_output_folder + "/positive/clean_extract_", content
+        counter += 1 if clean_and_write_article wiki_output_folder + "/positive/clean_extract_", content
 
         if (counter % 10 == 0)
           puts "Processing matched article nr. " + counter.to_s
         end
-        counter += 1
       end
     end
 
     if not found_category
       if negative_counter < counter
-        clean_and_write_article wiki_output_folder + "/negative/clean_extract_", content
-        if (negative_counter % 10 == 0)
-          puts "Processing unmatched article nr. " + negative_counter.to_s
-        end
-        negative_counter += 1
+        negative_counter += 1 if clean_and_write_article wiki_output_folder + "/negative/clean_extract_", content
       end
     end
   end
