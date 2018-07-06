@@ -152,7 +152,7 @@ class Crawler:
     
     def scheme_is_http_or_none(self, url):
         scheme = urlparse(url).scheme
-        return scheme == 'http' or scheme == ''
+        return scheme == 'http' or scheme == 'https' or scheme == ''
     
     def slugify(self, s):
         return re.sub(r'\W+', '-', unidecode(s).lower())
@@ -252,7 +252,7 @@ class Crawler:
             if self.scheme_is_http_or_none(a.get('href')):
                 resulting_url = self.get_absolute_url(url, a.get('href'))
                 if __CONFIG__['urldefrag']:
-                    resulting_url = urldefrag(resulting_url)[0] 
+                    resulting_url = urldefrag(resulting_url)[0]
                 self.add_url(resulting_url)
     
     def crawl(self):
