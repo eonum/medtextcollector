@@ -10,12 +10,13 @@ class Classifier:
         self.validity_checks = validity_checks
     
     def load_model_from_file(self):
-        with open(os.path.join(self.config['base-folder'], 'classificator', self.config['classifier-name'] + '.pickle'), 'rb') as file:
+        with open(os.path.join(self.config['base-folder'], 'classificator', 
+                               self.config['classifier-name'] + '.pickle'), 'rb') as file:
             return pickle.load(file)
             
     def classify(self, document):
         if self.validity_checks:
-            if not valid_document(document):
+            if not valid_document(document, self.config):
                 return 0.0
             try:
                 if langdetect.detect(document) != self.language:

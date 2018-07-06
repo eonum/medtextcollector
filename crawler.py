@@ -1,4 +1,4 @@
-from load_config import __CONFIG__
+from load_config import load_config
 import requests
 from bs4 import BeautifulSoup
 from urllib.parse import urlparse, urljoin, urldefrag
@@ -16,6 +16,8 @@ import sys
 from classifier import Classifier
 import tldextract
 import time
+
+__CONFIG__ = load_config()
 
 class Crawler:
     def __init__(self, base_url):

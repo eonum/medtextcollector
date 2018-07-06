@@ -62,7 +62,7 @@ def run():
     
     pipeline.fit(positive_documents_train + unlabeled_documents_train, gt)
 
-    model_path = os.path.join(__CONFIG__['base-folder'], 'classificator','pipeline-%s.pickle' % time.strftime('%d-%m-%y-%H'))
+    model_path = os.path.join(__CONFIG__['base-folder'], 'classificator', __CONFIG__['classifier-name'] + '.pickle')
     print("Saving model to %s ..." % model_path)    
     with open(model_path, 'wb') as file:
         pickle.dump(pipeline, file)
