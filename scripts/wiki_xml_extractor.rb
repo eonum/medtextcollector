@@ -12,6 +12,10 @@ def clean_and_write_article file_prefix, content
   content = content.gsub(/== Literatur ==(.*?)==/, " ")
   content = content.gsub(/== Weblinks ==(.*?)==/, " ")
   content = content.gsub(/== Einzelnachweise ==(.*?)==/, " ")
+  content = content.gsub(/ Einzelnachweise (.*?)\n/, " ")
+  content = content.gsub(/<!--(.*?)-->/, " ")
+  content = content.gsub(/Kategorie(.*?)\n/, " ")
+  content = content.gsub(/#REDIRECT(.*?)\n/, " ")
   content = content.gsub(/\[\[/, " ")
   content = content.gsub(/\]\]/, " ")
   content = content.gsub(/<ref(.*?)>/, " ")
@@ -71,6 +75,9 @@ while docstream.read
     if not found_category
       if negative_counter < counter
         clean_and_write_article wiki_output_folder + "/negative/clean_extract_", content
+        if (negative_counter % 10 == 0)
+          puts "Processing unmatched article nr. " + negative_counter.to_s
+        end
         negative_counter += 1
       end
     end
