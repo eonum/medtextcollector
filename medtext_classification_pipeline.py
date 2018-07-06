@@ -2,7 +2,7 @@ import os
 import pickle
 import random
 import time
-from load_config import __CONFIG__
+from load_config import load_config
 from tokenizer import SimpleGermanTokenizer
 from sklearn.metrics import f1_score, confusion_matrix, accuracy_score, precision_score, recall_score
 from classifier import valid_document
@@ -11,7 +11,7 @@ from sklearn.pipeline import Pipeline
 from sklearn.naive_bayes import MultinomialNB
 from sklearn.feature_extraction.text import TfidfVectorizer
 
-def load_documents(path, dataset_size):
+def load_documents(path, dataset_size, config):
     documents = []
     for (dirpath, dirnames, filenames) in os.walk(path):
         for filename in filenames: 
@@ -20,7 +20,7 @@ def load_documents(path, dataset_size):
         break
     documents = documents[:dataset_size]
     random.shuffle(documents)
-    testset_len = int(len(documents) * __CONFIG__['testset-ratio'])
+    testset_len = int(len(documents) * config['testset-ratio'])
        
     return documents[testset_len:], documents[:testset_len]
 
@@ -32,14 +32,18 @@ def clean(documents):
     return [doc for doc in documents if valid_document(doc)]
 
 def run():
+    __CONFIG__ = load_config()
+    
     print('Preparing base folder ... ')
     if not os.path.exists(os.path.join(__CONFIG__['base-folder'], 'classificator')):
         os.makedirs(os.path.join(__CONFIG__['base-folder'], 'classificator'))
         
     print('Loading data ...')
     max_dataset_size = __CONFIG__['max-dataset-size'] if __CONFIG__['max-dataset-size'] > 0 else None
-    positive_documents_train, positive_documents_test = load_documents(os.path.join(__CONFIG__['input-folder'], 'positive'), max_dataset_size)
-    unlabeled_documents_train, unlabeled_documents_test = load_documents(os.path.join(__CONFIG__['input-folder'], 'negative'), max_dataset_size) 
+    positive_documents_train, positive_documents_test = load_documents(os.path.join(__CONFIG__['input-folder'],
+                                                                                    'positive'), max_dataset_size, __CONFIG__)
+    unlabeled_documents_train, unlabeled_documents_test = load_documents(os.path.join(__CONFIG__['input-folder'],
+                                                                                      'negative'), max_dataset_size, __CONFIG__) 
         
     positive_documents_train, unlabeled_documents_train = unskew(positive_documents_train, unlabeled_documents_train)
     positive_documents_test, unlabeled_documents_test = unskew(positive_documents_test, unlabeled_documents_test)

@@ -1,7 +1,6 @@
 import pickle
 import os
 import langdetect
-from load_config import __CONFIG__
 
 class Classifier:
     def __init__(self, config, validity_checks=True):
@@ -25,8 +24,8 @@ class Classifier:
                 return 0.0
         
         p = self.model.predict_proba([document])[0][0]
-        p = 1 - p if __CONFIG__['invert-p'] else p
+        p = 1 - p if self.config['invert-p'] else p
         return p
             
-def valid_document(doc):
-    return len(doc) >= __CONFIG__['doc-min-tokens']
+def valid_document(doc, config):
+    return len(doc) >= config['doc-min-tokens']
