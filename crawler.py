@@ -110,9 +110,27 @@ class Crawler:
         try:
             next(x for x in self.urls if x[0] == url)
         except StopIteration:
-            p = self.get_p(url)
+            p, soup, content, raw_content = self.get_p(url)
             if p > __CONFIG__['threshold']:
                 self.urls.append((url, p))
+
+                if self.content_is_duplicated(content):
+                    print(' Duplicated content.')
+                    return False
+
+                if len(content) > 0:               
+                    with open(os.path.join(__CONFIG__['base-folder'], 'crawler', 'pages', 
+                                           self.filename_from_url(url)), 'w') as file:
+                        print(';'.join(['"%s"' % url, '"%s"' % time.strftime('%d-%m-%y-%H'),
+                                        '"%s"' % __CONFIG__['classifier-name'], '"%s"'  % str(p)]), file=file)       
+                        file.write(content)
+                    if __CONFIG__['store-raw']:
+                        with open(os.path.join(__CONFIG__['base-folder'], 'crawler', 'pages', 'raw',
+                                               self.filename_from_url(url)), 'w') as file:
+                            print('<!-- '+';'.join(['"%s"' % url, '"%s"' % time.strftime('%d-%m-%y-%H'),
+                                                    '"%s"' % __CONFIG__['classifier-name'], '"%s"'  % str(p)])
+                                  + '-->', file=file)       
+                            file.write(raw_content.decode('utf-8', errors='replace'))
             return True
         
         return False
@@ -121,26 +139,26 @@ class Crawler:
         try:
             r = self.request_from_cache(url)
             if not r:
-                return 0.0
+                return 0.0, None, None, None
         except Exception:
-            return 0.0
+            return 0.0, None, None, None
         
         soup = BeautifulSoup(r.text, 'lxml')
         
         if not soup.find():
-            return 0.0
+            return 0.0, None, None, None
         
         if len(r.content) > 0:
             content = self.extract_content(r.content)
         
         if not content:
-            return 0.0
+            return 0.0, None, None, None
         
         p = self.classifier.classify(content)
         
         print(" Rating "+ url + " : " + str(p))
         
-        return p
+        return p, soup, content, r.content
         
     def is_absolute_url(self, url):
         return bool(urlparse(url).netloc)
@@ -225,29 +243,6 @@ class Crawler:
             return
         
         soup = BeautifulSoup(r.text, 'lxml')
-        
-        if not soup.find():
-            return
-        
-        if len(r.content) > 0:
-            content = self.extract_content(r.content)
-            
-        if not content:
-            return
-        
-        if self.content_is_duplicated(content):
-            print(' Duplicated content.')
-            return
-        
-        if len(content) > 0:               
-            with open(os.path.join(__CONFIG__['base-folder'], 'crawler', 'pages', self.filename_from_url(url)), 'w') as file:
-                print(';'.join(['"%s"' % url, '"%s"' % time.strftime('%d-%m-%y-%H'), '"%s"' % __CONFIG__['classifier-name'], '"%s"'  % str(p)]), file=file)       
-                file.write(content)
-            if __CONFIG__['store-raw']:
-                with open(os.path.join(__CONFIG__['base-folder'], 'crawler', 'pages', 'raw', self.filename_from_url(url)), 'w') as file:
-                    print('<!-- '+';'.join(['"%s"' % url, '"%s"' % time.strftime('%d-%m-%y-%H'), '"%s"' % __CONFIG__['classifier-name'], '"%s"'  % str(p)]) + '-->', file=file)       
-                    file.write(r.content.decode('utf-8', errors='replace'))
-
         for a in soup.find_all('a'):
             if self.scheme_is_http_or_none(a.get('href')):
                 resulting_url = self.get_absolute_url(url, a.get('href'))
