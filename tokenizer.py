@@ -126,7 +126,7 @@ def get_tokenizer(tk):
         tokenizer = NonStemmingTokenizer()
     else:
         # Default
-        print("Warining: Couldn't find specified tokenizer. Continuing with default tokenizer. ")
+        print("Warning: Couldn't find specified tokenizer. Continuing with default tokenizer. ")
         tokenizer = NonStemmingTokenizer()
 
     return tokenizer
