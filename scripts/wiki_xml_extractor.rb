@@ -9,18 +9,27 @@ categories_file = ARGV[2]
 
 def clean_and_write_article file_prefix, content
   content = content.gsub(/<ref(.*?)<\/ref>/m, " ")
-  content = content.gsub(/== Literatur ==(.*?)==/, " ")
-  content = content.gsub(/== Weblinks ==(.*?)==/, " ")
-  content = content.gsub(/== Einzelnachweise ==(.*?)==/, " ")
-  content = content.gsub(/ Einzelnachweise (.*?)\n/, " ")
+
+  # remove everything after X
+  content = content.gsub(/^[=\s]*Literatur[=\s]*\n(.*)/mi, '')
+  content = content.gsub(/^[=\s]*Weblinks[=\s]*\n(.*)/mi, '')
+  content = content.gsub(/^[=\s]*Einzelnachweise[=\s]*\n(.*)/mi, '')
+  content = content.gsub(/^[=\s]*Quellen[=\s]*\n(.*)/mi, '')
+  content = content.gsub(/^[=\s]*Literatur und Quellen[=\s]*\n(.*)/mi, '')
+  content = content.gsub(/^[=\s]*Schriften[=\s]*\n(.*)/mi, '')
+
+
   content = content.gsub(/<!--(.*?)-->/m, " ")
-  content = content.gsub(/Kategorie(.*?)\n/, " ")
-  content = content.gsub(/ Datei:(.*?)\n/, " ")
+  content = content.gsub(/^\s*Kategorie:(.*)\n/i, " ")
+  content = content.gsub(/ Datei:(.*?)\n/i, " ")
+  content = content.gsub(/Bild:(.*?)\n/i, " ")
   content = content.gsub(/:{(.*?)}/m, " ")
-  content = content.gsub(/#REDIRECT(.*?)\n/, " ")
-  content = content.gsub(/\[\[/, " ")
-  content = content.gsub(/\]\]/, " ")
+  content = content.gsub(/#REDIRECT(.*)/i, " ")
+
   content = content.gsub(/<ref(.*?)>/m, " ")
+  content = content.gsub(/\{\|(.*?)\|\}/m, " ")
+  content = content.gsub(/\{\{(.*?)\}\}/m, " ")
+
   content = content.gsub(/\'\'{{lang(.*?)\'\'/, " ")
   content = content.gsub(/{{lang(.*?)}}/, " ")
   content = content.gsub(/=====/, " ")
@@ -35,9 +44,10 @@ def clean_and_write_article file_prefix, content
   content = content.gsub(/\*\*\*\*/, " ")
   content = content.gsub(/\*\*\*/, " ")
   content = content.gsub(/\*\*/, " ")
-  content = content.gsub(/\{\|(.*?)\|\}/m, " ")
-  content = content.gsub(/\{\{(.*?)\}\}/m, " ")
+
   content = content.gsub(/&nbsp\;/, " ")
+  content = content.gsub(/\[\[/, " ")
+  content = content.gsub(/\]\]/, " ")
 
   content = content.strip
   return false if content == ''
