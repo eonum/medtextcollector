@@ -144,17 +144,20 @@ class Crawler:
             if not r:
                 return 0.0, None, None, None
         except Exception:
+            print("Exception for " + url)
             return 0.0, None, None, None
         
         soup = BeautifulSoup(r.text, 'lxml')
         
         if not soup.find():
+            print("no soup for " + url)
             return 0.0, None, None, None
         
         if len(r.content) > 0:
             content = self.extract_content(r.content)
         
         if not content:
+            print("no content for " + url)
             return 0.0, None, None, None
         
         p = self.classifier.classify(content)
