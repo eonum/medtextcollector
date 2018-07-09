@@ -58,6 +58,7 @@ class Crawler:
             return False
             
     def sort_and_crop_urls(self):
+        # sort based on p(medical) in descending order
         self.urls.sort(key=itemgetter(1), reverse=True)
         
         if __CONFIG__['max_urls'] > 0:
@@ -94,6 +95,8 @@ class Crawler:
         if len(self.urls) == 0:
             return None, None
         self.sort_and_crop_urls()
+        
+        # pop the first not excluded article
         while True:
             url = self.urls.pop(0)
             if not self.is_excluded_url(url[0]) and not self.excluded_keyword_in_url(url[0]) and self.mandatory_keywords_in_url(url[0]):
@@ -218,6 +221,7 @@ class Crawler:
     def request_from_cache(self, url):
         slug = self.slugify(url)
         if slug in self.request_cache:
+            print("retrieve " + url + " from cache")
             r = self.request_cache.pop(slug)
         else:
             tld = tldextract.extract(url)
@@ -231,6 +235,7 @@ class Crawler:
                         self.visits_per_tld[tld] += 1
                 else:
                     self.visits_per_tld[tld] = 1
+            print("request " + url)        
             r = requests.get(url)
             self.request_cache[slug] = r
         return r
