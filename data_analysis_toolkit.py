@@ -44,4 +44,5 @@ def get_files_from_folder(path):
     return file_names
 
 def extract_sentences(content, sentence_detector):
-    return [sentence.replace('\n', ' ') for sentence in sentence_detector.tokenize(content) if not sentence.isspace()]
+    return [sentence.replace('\n', ' ') for sentence in sentence_detector.tokenize(content) if not sentence.isspace()
+           and sentence[:4] != 'http' and len(sentence) > 12 and 4 * sum(c.isdigit() for c in sentence) < len(sentence)]
