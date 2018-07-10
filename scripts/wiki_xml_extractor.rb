@@ -21,7 +21,7 @@ def clean_and_write_article file_prefix, content
 
   content = content.gsub(/<!--(.*?)-->/m, " ")
   content = content.gsub(/^\s*Kategorie:(.*)\n/i, " ")
-  content = content.gsub(/ Datei:(.*?)\n/i, " ")
+  content = content.gsub(/Datei:(.*?)\n/i, " ")
   content = content.gsub(/Bild:(.*?)\n/i, " ")
   content = content.gsub(/:{(.*?)}/m, " ")
   content = content.gsub(/#REDIRECT(.*)/i, " ")
