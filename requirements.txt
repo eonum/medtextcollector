@@ -2,7 +2,7 @@ lxml==3.7.3
 wikipedia==1.4.0
 requests==2.9.1
 tldextract==2.0.2
-nltk==3.2.1
+nltk==3.4.5
 Unidecode==0.4.19
 langdetect==1.0.7
 jusText==2.2.0
